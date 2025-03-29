@@ -3,136 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JORGEDEZ TV App</title>
+    <title>JORGEDEZ TV App (v2)</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS (Nuevos Colores Estilo JORGEDEZ) --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* --- CSS (Colores JORGEDEZ + Sidebar AutoHide) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; overflow: hidden; }
-        body { background-color: #121212; /* Fondo general muy oscuro */ color: #e0e0e0; font-family: 'Roboto', sans-serif; display: flex; }
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Roboto', sans-serif; display: flex; }
+        body.fullscreen-active .sidebar { width: 0 !important; padding: 0 !important; overflow: hidden !important; border: none !important; } /* !important para sobreescribir */
+        body.fullscreen-active .main-content { padding: 0; }
+
         .app-container { display: flex; width: 100%; height: 100%; }
 
-        /* --- Barra Lateral (Sidebar) --- */
         .sidebar {
-            width: 280px;
-            flex-shrink: 0;
-            /* Nuevo: Fondo gris oscuro/negro */
-            background-color: #1C1C1C;
-            /* background: linear-gradient(to bottom, #282828, #181818); */ /* O un gradiente sutil */
-            padding: 15px 5px 15px 15px;
-            height: 100%;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            transition: width 0.3s ease, padding 0.3s ease;
-            border-right: 1px solid #333; /* Borde sutil para separar */
+            width: 280px; flex-shrink: 0; background-color: #1C1C1C;
+            padding: 15px 5px 15px 15px; height: 100%; overflow-x: hidden; /* Ocultar scroll horizontal */ overflow-y: auto;
+            display: flex; flex-direction: column;
+            transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease; /* Añadir opacity */
+            border-right: 1px solid #333;
+            opacity: 1;
         }
-        .sidebar.hidden { width: 0; padding: 0; overflow: hidden; border: none; }
-
-        /* --- Logo --- */
-        #app-logo {
-            display: block;
-            max-width: 80%; /* Ajustar si es necesario */
-            height: auto;
-            margin: 10px auto 25px auto;
-            flex-shrink: 0;
+        .sidebar.hidden { /* Estado oculto */
+             width: 0; padding: 0; overflow: hidden; border: none; opacity: 0;
         }
 
-        /* --- Lista de Canales --- */
+        #app-logo { display: block; max-width: 80%; height: auto; margin: 10px auto 25px auto; flex-shrink: 0; transition: opacity 0.3s ease; }
+        .sidebar.hidden #app-logo { opacity: 0; }
+
         #channel-list { list-style: none; flex-grow: 1; overflow-y: auto; padding-right: 10px; }
         #channel-list::-webkit-scrollbar { width: 8px; }
-        /* Nuevo: Scrollbar gris oscuro */
         #channel-list::-webkit-scrollbar-track { background: #333; border-radius: 4px; }
         #channel-list::-webkit-scrollbar-thumb { background-color: #666; border-radius: 4px; }
 
         .channel-list-item {
-            padding: 11px 10px; /* Ligeramente menos padding vertical */
-            margin-bottom: 4px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.15s ease, color 0.15s ease;
-            display: flex;
-            align-items: center;
-            font-size: 0.95em;
-            /* Nuevo: Color de texto base gris claro */
-            color: #b3b3b3;
-        }
-        .channel-list-item:hover { /* Efecto hover sutil */
-             background-color: #282828;
-             color: #ffffff;
-        }
-        .channel-list-item .icon { margin-right: 10px; font-size: 1.1em; flex-shrink: 0; }
-        .channel-list-item .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+             padding: 11px 10px; margin-bottom: 4px; border-radius: 5px; cursor: pointer;
+             transition: background-color 0.15s ease, color 0.15s ease;
+             display: flex; align-items: center; font-size: 0.95em; color: #b3b3b3;
+             white-space: nowrap; /* Evitar que el contenido del item salte de línea */
+         }
+        .channel-list-item:hover { background-color: #282828; color: #ffffff; }
+        .channel-list-item .icon { margin-right: 10px; font-size: 1.1em; flex-shrink: 0; width: 1.5em; text-align: center; } /* Ancho fijo para icono */
+         .channel-list-item .icon.favorite { color: #FFEB3B; } /* Color estrella */
+        .channel-list-item .title { overflow: hidden; text-overflow: ellipsis; }
 
-        /* --- Estado de Foco en la Lista (ROJO) --- */
         .channel-list-item.focused {
-            /* Nuevo: Fondo Rojo */
-            background-color: #FF0000; /* YouTube Red */
-            /* Nuevo: Texto blanco bien contrastante */
-            color: #ffffff;
-            font-weight: 500;
-            box-shadow: 0 0 8px rgba(255, 0, 0, 0.5); /* Sombra roja opcional */
-        }
+            background-color: #FF0000; color: #ffffff; font-weight: 500;
+            /* box-shadow: 0 0 8px rgba(255, 0, 0, 0.5); */ /* Sombra opcional */
+         }
 
-        /* --- Área Principal de Contenido --- */
-        .main-content {
-            flex-grow: 1;
-            background-color: #000; /* Negro sólido para video */
-            padding: 0;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
+        .main-content { flex-grow: 1; background-color: #000; padding: 0; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        #channel-details { display: none; position: absolute; bottom: 60px; left: 10px; background: rgba(0,0,0,0.6); color: #fff; padding: 5px 10px; border-radius: 4px; z-index: 10; font-size: 0.8em; }
+        #player-status { display: block; } /* Status siempre visible dentro del panel oculto */
 
-        /* --- Panel de Detalles (Oculto) y Status --- */
-        #channel-details { display: none; /* ... estilos ... */ }
-        #player-status { display: none; /* ... estilos ... */ }
-
-        /* --- Contenedor y Reproductor de Video --- */
         #video-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background-color: #000; overflow: hidden; }
         #video-player { display: block; width: 100%; height: 100%; background-color: #000; }
-        #video-container:-webkit-full-screen,
-        #video-container:-moz-full-screen,
-        #video-container:-ms-fullscreen,
-        #video-container:fullscreen { width: 100%; height: 100%; }
-
-        /* --- Fullscreen --- */
-        body.fullscreen-active .sidebar { width: 0; padding: 0; overflow: hidden; border: none; }
-        body.fullscreen-active .main-content { padding: 0; }
+        #video-container:-webkit-full-screen, #video-container:fullscreen { width: 100%; height: 100%; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="sidebar">
-            <img id="app-logo"
-                 src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhecDZUIs_iS7eQxCxuX3QGG8bMqaucszgd6Uc1USdXvaOqAaz4dPU1nilDxRLIb5uPX471hvozs_SkhHA06nB-CTh6r_nl8Y-M2cHn4Mqr9XhbZKVlK5-J1n5zXQIwN88ZcFl3B0wDgSIbNj_vPWXIsb6dcQg-87uogzB9b-OLjVtkOL9FKhDNlgnyvcI/s320/logo%20(jorgedez)%20rojo%20y%20blanco%20parecido%20a%20YouTube.jpeg"
-                 alt="JORGEDEZ Logo">
-            <ul id="channel-list">
-                </ul>
+            <img id="app-logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhecDZUIs_iS7eQxCxuX3QGG8bMqaucszgd6Uc1USdXvaOqAaz4dPU1nilDxRLIb5uPX471hvozs_SkhHA06nB-CTh6r_nl8Y-M2cHn4Mqr9XhbZKVlK5-J1n5zXQIwN88ZcFl3B0wDgSIbNj_vPWXIsb6dcQg-87uogzB9b-OLjVtkOL9FKhDNlgnyvcI/s320/logo%20(jorgedez)%20rojo%20y%20blanco%20parecido%20a%20YouTube.jpeg" alt="JORGEDEZ Logo">
+            <ul id="channel-list"></ul>
         </div>
         <div class="main-content">
             <div id="channel-details"><p id="player-status"></p></div>
             <div id="video-container">
-                <video id="video-player" controls autoplay playsinline>
-                    Tu navegador no soporta la etiqueta de video.
-                </video>
+                <video id="video-player" controls autoplay playsinline>Video no soportado.</video>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        // --- JavaScript (Sin cambios respecto a la versión anterior) ---
         document.addEventListener('DOMContentLoaded', () => {
-            const channels = [
-                // ... (PEGA AQUÍ LA LISTA COMPLETA DE CANALES) ...
+             // --- DATOS ---
+             const channels = [
+                 // ... (PEGA AQUÍ LA LISTA COMPLETA DE CANALES) ...
                  { title: "Tele red", url: "https://k20.usastreams.com:8081/telered/index.m3u8", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc0CfBLPTdVRLyxhsV8Hq3wfIeJAPwiC2TQOhBNoFV893ShXIpe0MWXG9nhjQnTPtsMTk&usqp=CAU", descripcion: "Canal de noticias local." },
                  { title: "Canal 13", url: "https://ssh101.bozztv.com/ssh101/sinart13/chunks.m3u8", logo: "https://sicultura-live.s3.amazonaws.com/public/styles/large_retina/public/media/sinart_canal_13_1.png?itok=WgWfcqWw", descripcion: "Canal de entretenimiento." },
                  { title: "Canal 2", url: "https://d30230c1j3h08x.cloudfront.net/360p.m3u8", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSf67Sxp-_WX2yWMZiWmW6teYlYvuPvJpud-w&s", descripcion: "Canal de deportes." },
@@ -181,155 +128,227 @@
                  { title: "Gam tv", url: "https://v2.azulstream.com:8081/gamtv/gamtv/tracks-v1a1/mono.m3u8", logo: "https://radiocostarica.net/sites/default/files/styles/player_image/public/2024-06/GAM%20TV%20CR-Costa%20Rica_0.png.webp?itok=ExXxZFSr", descripcion: "Entretenimiento" }
             ];
 
-            const channelListElement = document.getElementById('channel-list');
-            const sidebarElement = document.querySelector('.sidebar');
-            const videoPlayer = document.getElementById('video-player');
-            const videoContainer = document.getElementById('video-container');
-            const playerStatus = document.getElementById('player-status');
-            const detailsPanel = document.getElementById('channel-details');
+             // --- Referencias DOM ---
+             const channelListElement = document.getElementById('channel-list');
+             const sidebarElement = document.querySelector('.sidebar');
+             const videoPlayer = document.getElementById('video-player');
+             const videoContainer = document.getElementById('video-container');
+             const playerStatus = document.getElementById('player-status');
+             const detailsPanel = document.getElementById('channel-details');
 
-            let currentFocusIndex = 0;
-            let hls = null;
-            let currentStreamUrl = null;
+             // --- Estado App ---
+             let currentFocusIndex = 0;
+             let hls = null;
+             let currentStreamUrl = null;
+             let sidebarHideTimeout = null;
+             const SIDEBAR_TIMEOUT_DURATION = 4000; // 4 segundos
+             let favorites = loadFavorites(); // Cargar favoritos
 
-            // --- Funciones ---
-             function renderChannels() { /* ... igual ... */
+            // --- Funciones Favoritos ---
+             function loadFavorites() { const f = localStorage.getItem('jorgedezFavorites'); return f ? JSON.parse(f) : []; }
+             function saveFavorites(f) { localStorage.setItem('jorgedezFavorites', JSON.stringify(f)); }
+             function isChannelFavorite(url) { return favorites.includes(url); }
+             function toggleChannelFavorite(url) {
+                 const i = favorites.indexOf(url);
+                 if (i > -1) favorites.splice(i, 1); else favorites.push(url);
+                 saveFavorites(favorites);
+             }
+
+            // --- Funciones Sidebar ---
+             function hideSidebar() { if (!document.body.classList.contains('fullscreen-active')) sidebarElement.classList.add('hidden'); }
+             function showSidebarAndResetTimeout() {
+                 clearTimeout(sidebarHideTimeout);
+                 sidebarElement.classList.remove('hidden');
+                 sidebarHideTimeout = setTimeout(hideSidebar, SIDEBAR_TIMEOUT_DURATION);
+             }
+
+             // --- Funciones Principales (Render, Focus, Status, Play, Fullscreen, KeyPress, FullscreenChange) ---
+              function renderChannels() {
                 channelListElement.innerHTML = '';
                 if (channels.length === 0) return;
-                channels.forEach((channel, index) => {
+                channels.forEach(channel => { channel.isFavorite = isChannelFavorite(channel.url); }); // Marcar favs
+                channels.sort((a, b) => (b.isFavorite - a.isFavorite) || a.title.localeCompare(b.title)); // Ordenar
+
+                channels.forEach((channel, index) => { // Renderizar ordenados
                     const item = document.createElement('li');
                     item.classList.add('channel-list-item');
-                    item.dataset.index = index;
-                    item.dataset.url = channel.url;
+                    item.dataset.url = channel.url; // Usar URL como ID fiable
                     item.dataset.title = channel.title;
                     item.dataset.description = channel.descripcion;
                     item.dataset.logo = channel.logo;
+                    item.dataset.isFavorite = channel.isFavorite;
                     item.setAttribute('tabindex', -1);
                     const iconSpan = document.createElement('span');
                     iconSpan.classList.add('icon');
-                    iconSpan.textContent = '►';
+                    iconSpan.textContent = channel.isFavorite ? '★' : '►';
+                    if (channel.isFavorite) iconSpan.classList.add('favorite'); // Clase para estilo
                     const titleSpan = document.createElement('span');
                     titleSpan.classList.add('title');
                     titleSpan.textContent = channel.title;
-                    item.appendChild(iconSpan);
-                    item.appendChild(titleSpan);
+                    item.appendChild(iconSpan); item.appendChild(titleSpan);
                     channelListElement.appendChild(item);
                 });
-                updateFocus(0);
-             }
-             function updateFocus(newIndex) { /* ... igual ... */
-                const items = channelListElement.querySelectorAll('.channel-list-item');
-                if (newIndex < 0 || newIndex >= items.length || items.length === 0) return;
-                if (items[currentFocusIndex]) items[currentFocusIndex].classList.remove('focused');
-                currentFocusIndex = newIndex;
-                const currentItem = items[currentFocusIndex];
-                if (!currentItem) return;
-                currentItem.classList.add('focused');
-                currentItem.focus();
-                const itemTop = currentItem.offsetTop - sidebarElement.offsetTop;
-                const itemHeight = currentItem.offsetHeight;
-                const sidebarScrollTop = sidebarElement.scrollTop;
-                const sidebarHeight = sidebarElement.clientHeight;
-                if (itemTop < sidebarScrollTop) {
-                    sidebarElement.scrollTop = itemTop - 10;
-                } else if (itemTop + itemHeight > sidebarScrollTop + sidebarHeight) {
-                    sidebarElement.scrollTop = itemTop + itemHeight - sidebarHeight + 10;
+
+                // Reajustar foco
+                const focusedUrl = channelListElement.querySelector(`[data-url="${currentStreamUrl}"]`) ? currentStreamUrl : (channelListElement.querySelector('.channel-list-item')?.dataset.url);
+                let newFocusIndex = 0;
+                if(focusedUrl){
+                    const itemsNow = channelListElement.querySelectorAll('.channel-list-item');
+                    itemsNow.forEach((item, index) => {
+                         if (item.dataset.url === focusedUrl) newFocusIndex = index;
+                    });
                 }
-             }
-             function setPlayerStatus(message, isError = false) { /* ... igual ... */
-                if (detailsPanel) {
-                    playerStatus.textContent = message;
-                    const showStatusPanel = !!message; // Mostrar panel si hay mensaje
-                    playerStatus.style.display = showStatusPanel ? 'block' : 'none';
-                    detailsPanel.style.display = showStatusPanel ? 'block' : 'none'; // Mostrar/ocultar panel con status
-                    playerStatus.style.color = isError ? '#ff8a80' : '#ffcc80';
-                }
-                if (isError) {
-                    videoPlayer.style.display = 'none';
-                } else if (message === "") { // Limpiar mensaje = reproducción OK (o intento)
-                    videoPlayer.style.display = 'block';
-                     if(detailsPanel) detailsPanel.style.display = 'none'; // Ocultar panel si no hay mensaje
-                 }
-                console.log("Player Status:", message);
-             }
-             function playStream(url) { /* ... igual ... */
-                 if (!url) { setPlayerStatus("URL no válida.", true); return; }
-                if (url === currentStreamUrl) { console.log("Stream ya cargado."); videoPlayer.play().catch(e=>console.warn(e)); setPlayerStatus(""); return; }
-                console.log("Intentando cargar:", url);
-                setPlayerStatus("Cargando...");
-                videoPlayer.style.display = 'block';
-                if (hls) { hls.destroy(); hls = null; }
-                videoPlayer.src = "";
-                if (Hls.isSupported()) {
-                    hls = new Hls({});
-                    hls.loadSource(url);
-                    hls.attachMedia(videoPlayer);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => { setPlayerStatus(""); videoPlayer.muted=false; videoPlayer.play().catch(e => setPlayerStatus("Click Play.", false)); currentStreamUrl = url; });
-                    hls.on(Hls.Events.ERROR, (event, data) => { console.error('Error HLS:', data); setPlayerStatus(`Error: ${data.details}`, true); currentStreamUrl = null; });
-                } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                    videoPlayer.src = url;
-                    videoPlayer.addEventListener('loadedmetadata', () => { setPlayerStatus(""); videoPlayer.muted=false; videoPlayer.play().catch(e => setPlayerStatus("Click Play.", false)); currentStreamUrl = url; }, { once: true });
-                    videoPlayer.onerror = (e) => { console.error("Error video nativo:", e); setPlayerStatus("Error al cargar (nativo).", true); currentStreamUrl = null; }
-                } else { setPlayerStatus("Navegador no soporta HLS.", true); currentStreamUrl = null; }
-             }
-             function toggleFullScreen() { /* ... igual ... */
-                 const isInFullScreen = document.fullscreenElement || document.webkitFullscreenElement;
-                if (!isInFullScreen) {
-                    if (videoContainer.requestFullscreen) videoContainer.requestFullscreen();
-                    else if (videoContainer.webkitRequestFullscreen) videoContainer.webkitRequestFullscreen();
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
-                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                }
-             }
-             function handleKeyPress(event) { /* ... igual ... */
+                 // Asegurarse que el índice existe antes de llamar a updateFocus
+                 const itemsTotal = channelListElement.querySelectorAll('.channel-list-item').length;
+                 if (newFocusIndex >= itemsTotal) newFocusIndex = Math.max(0, itemsTotal - 1);
+
+                updateFocus(newFocusIndex);
+            }
+
+             function updateFocus(newIndex) {
                  const items = channelListElement.querySelectorAll('.channel-list-item');
-                if (items.length === 0 && !['f', 'Escape'].includes(event.key)) return;
-                const isInFullScreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-                if (isInFullScreen && !['f', 'Escape'].includes(event.key)) { return; }
-                 else if (!isInFullScreen) {
-                    const keyMap = { 'ArrowUp': 'up', 'ArrowDown': 'down', 'Enter': 'ok', 'Accept': 'ok', 'Ok': 'ok', 'f': 'fullscreen' };
-                    const action = keyMap[event.key];
-                    if (!action) return;
-                    event.preventDefault();
-                    let newIndex = currentFocusIndex;
-                    switch (action) {
-                        case 'up': newIndex = currentFocusIndex - 1; if (newIndex < 0) newIndex = items.length - 1; break;
-                        case 'down': newIndex = currentFocusIndex + 1; if (newIndex >= items.length) newIndex = 0; break;
-                        case 'ok': const selectedItem = items[currentFocusIndex]; if (selectedItem) { playStream(selectedItem.dataset.url); } return;
-                        case 'fullscreen': toggleFullScreen(); return;
-                    }
-                    if (newIndex !== currentFocusIndex) { updateFocus(newIndex); }
-                } else if (event.key === 'f') {
-                    event.preventDefault();
-                    toggleFullScreen();
-                }
+                 if (newIndex < 0 || newIndex >= items.length || items.length === 0) return;
+                 const oldFocused = channelListElement.querySelector('.channel-list-item.focused');
+                 if(oldFocused) oldFocused.classList.remove('focused');
+                 currentFocusIndex = newIndex;
+                 const currentItem = items[currentFocusIndex];
+                 if (!currentItem) return;
+                 currentItem.classList.add('focused');
+                 currentItem.focus();
+                 // Scroll
+                  const itemTop = currentItem.offsetTop - sidebarElement.offsetTop;
+                 const itemHeight = currentItem.offsetHeight;
+                 const sidebarScrollTop = sidebarElement.scrollTop;
+                 const sidebarHeight = sidebarElement.clientHeight;
+                 if (itemTop < sidebarScrollTop) sidebarElement.scrollTop = itemTop - 10;
+                 else if (itemTop + itemHeight > sidebarScrollTop + sidebarHeight) sidebarElement.scrollTop = itemTop + itemHeight - sidebarHeight + 10;
              }
-             function handleFullscreenChange() { /* ... igual ... */
+
+             function setPlayerStatus(message, isError = false) {
+                 if (detailsPanel) {
+                     playerStatus.textContent = message;
+                     const showStatusPanel = !!message;
+                     playerStatus.style.display = showStatusPanel ? 'block' : 'none';
+                     detailsPanel.style.display = showStatusPanel ? 'block' : 'none';
+                     playerStatus.style.color = isError ? '#ff8a80' : '#ffcc80';
+                 }
+                 if (isError) { videoPlayer.style.display = 'none'; }
+                 else if(message === "") { videoPlayer.style.display = 'block'; if(detailsPanel) detailsPanel.style.display = 'none'; }
+                 console.log("Player Status:", message);
+             }
+
+             function playStream(url) {
+                 if (!url) { setPlayerStatus("URL no válida.", true); return; }
+                 if (url === currentStreamUrl) { setPlayerStatus(""); videoPlayer.play().catch(e=>console.warn(e)); return; }
+                 console.log("Intentando cargar:", url);
+                 setPlayerStatus("Cargando...");
+                 videoPlayer.style.display = 'block';
+                 if (hls) { hls.destroy(); hls = null; }
+                 videoPlayer.src = "";
+                 if (Hls.isSupported()) {
+                     hls = new Hls({});
+                     hls.loadSource(url);
+                     hls.attachMedia(videoPlayer);
+                     hls.on(Hls.Events.MANIFEST_PARSED, () => { setPlayerStatus(""); videoPlayer.muted=false; videoPlayer.play().catch(e => setPlayerStatus("Click Play.", false)); currentStreamUrl = url; });
+                     hls.on(Hls.Events.ERROR, (e,d) => { console.error('HLS Error:', d); setPlayerStatus(`Error: ${d.details}`, true); currentStreamUrl = null; });
+                 } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                     videoPlayer.src = url;
+                     videoPlayer.addEventListener('loadedmetadata', () => { setPlayerStatus(""); videoPlayer.muted=false; videoPlayer.play().catch(e => setPlayerStatus("Click Play.", false)); currentStreamUrl = url; }, { once: true });
+                     videoPlayer.onerror = (e) => { console.error("Nativo Error:", e); setPlayerStatus("Error (nativo).", true); currentStreamUrl = null; }
+                 } else { setPlayerStatus("Navegador no soporta HLS.", true); currentStreamUrl = null; }
+                 // Ocultar sidebar al iniciar play
+                 clearTimeout(sidebarHideTimeout); hideSidebar();
+             }
+
+             function toggleFullScreen() {
+                 const elementToMakeFullScreen = videoPlayer; // Intentar con video player directo
+                 console.log("Toggle Fullscreen llamado. Elemento:", elementToMakeFullScreen);
+                 const isInFullScreen = document.fullscreenElement || document.webkitFullscreenElement;
+                 if (!isInFullScreen) {
+                     console.log("Intentando entrar...");
+                     if (elementToMakeFullScreen.requestFullscreen) elementToMakeFullScreen.requestFullscreen().catch(err => console.error("Error FS:", err));
+                     else if (elementToMakeFullScreen.webkitRequestFullscreen) elementToMakeFullScreen.webkitRequestFullscreen().catch(err => console.error("Error webkitFS:", err));
+                     else console.warn("API Fullscreen no soportada");
+                 } else {
+                     console.log("Intentando salir...");
+                     if (document.exitFullscreen) document.exitFullscreen().catch(err => console.error("Error exitFS:", err));
+                     else if (document.webkitExitFullscreen) document.webkitExitFullscreen().catch(err => console.error("Error webkitExitFS:", err));
+                      else console.warn("API exitFullscreen no soportada");
+                 }
+             }
+
+             function handleKeyPress(event) {
+                 const isInFullScreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                 // Permitir salir de fullscreen siempre
+                  if (event.key === 'Escape' && isInFullScreen) { /* Navegador maneja */ return; }
+                  if (event.key === 'f') { event.preventDefault(); toggleFullScreen(); return; }
+
+                 // Si está en fullscreen, ignorar otras teclas (excepto las que maneje el video player)
+                 if (isInFullScreen) return;
+
+                 // Si NO está en fullscreen:
+                 const items = channelListElement.querySelectorAll('.channel-list-item');
+                 if (items.length === 0) return; // No hacer nada si no hay items
+
+                 const keyMap = { 'ArrowUp': 'up', 'ArrowDown': 'down', 'Enter': 'ok', 'Accept': 'ok', 'Ok': 'ok', '5': 'favorite', '*': 'favorite' };
+                 const action = keyMap[event.key];
+
+                 if (!action) return; // Ignorar teclas no mapeadas
+                 event.preventDefault();
+
+                 // Mostrar sidebar y reiniciar timer en navegación/acción
+                 if (['up', 'down', 'ok', 'favorite'].includes(action)) {
+                      showSidebarAndResetTimeout();
+                  }
+
+                 let newIndex = currentFocusIndex;
+
+                 switch (action) {
+                     case 'up': newIndex = currentFocusIndex - 1; if (newIndex < 0) newIndex = items.length - 1; break;
+                     case 'down': newIndex = currentFocusIndex + 1; if (newIndex >= items.length) newIndex = 0; break;
+                     case 'ok':
+                         const selectedItem = items[currentFocusIndex];
+                         if (selectedItem) playStream(selectedItem.dataset.url);
+                         return;
+                     case 'favorite':
+                         const favItem = items[currentFocusIndex];
+                         if (favItem) {
+                              toggleChannelFavorite(favItem.dataset.url);
+                              renderChannels(); // Re-renderizar y re-enfocar
+                         }
+                         return;
+                 }
+                 if (newIndex !== currentFocusIndex) updateFocus(newIndex);
+             }
+
+             function handleFullscreenChange() {
                  const isInFullScreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
                  document.body.classList.toggle('fullscreen-active', isInFullScreen);
-                 if (!isInFullScreen) {
+                  if (!isInFullScreen) {
+                     // Reajustar foco y reiniciar timer del sidebar
                      const currentItem = channelListElement.querySelectorAll('.channel-list-item')[currentFocusIndex];
                      if(currentItem) currentItem.focus();
-                 }
+                      showSidebarAndResetTimeout(); // Mostrar sidebar al salir de fullscreen
+                  } else {
+                      clearTimeout(sidebarHideTimeout); // No ocultar sidebar si entramos a fullscreen
+                  }
              }
 
-            // --- Inicialización y Listeners (igual) ---
+            // --- Inicialización y Listeners ---
             renderChannels();
             document.addEventListener('keydown', handleKeyPress);
-            channelListElement.addEventListener('click', (event) => {
-                const clickedItem = event.target.closest('.channel-list-item');
-                if (clickedItem) {
-                     const index = parseInt(clickedItem.dataset.index, 10);
-                     if (!isNaN(index)) {
-                         updateFocus(index);
-                         playStream(clickedItem.dataset.url);
-                     }
-                }
+            channelListElement.addEventListener('click', (e) => {
+                const c = e.target.closest('.channel-list-item'); if(!c) return;
+                const u = c.dataset.url;
+                const items = channelListElement.querySelectorAll('.channel-list-item'); let i=-1;
+                items.forEach((item, idx) => {if(item.dataset.url === u) i=idx;});
+                if(u && i!==-1){ updateFocus(i); playStream(u);}
             });
             videoContainer.addEventListener('dblclick', toggleFullScreen);
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            showSidebarAndResetTimeout(); // Iniciar timer al cargar
         });
     </script>
-
 </body>
 </html>
