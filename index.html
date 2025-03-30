@@ -44,7 +44,7 @@
         }
 
         .header img {
-            height: 60px;
+            height: 80px; /* <-- CAMBIADO A 80px */
             margin-right: 20px;
         }
 
@@ -52,7 +52,7 @@
             display: flex;
             flex-direction: row;
             max-width: 1400px;
-            margin: 80px auto 20px;
+            margin: 80px auto 20px; /* Ajustado margen superior si el header es más alto */
             padding: 20px;
             background-color: var(--background-color);
             height: 80vh;
@@ -136,17 +136,17 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         #playlist li:hover {
-             background: linear-gradient(145deg, var(--card-hover-bg-start), var(--card-hover-bg-end));
-             transform: translateY(-2px);
-             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(145deg, var(--card-hover-bg-start), var(--card-hover-bg-end));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-         /* Estilo para el LI activo (contenedor del botón activo) */
-         #playlist li.active {
-             background: linear-gradient(145deg, var(--primary-color), var(--primary-color-hover));
-             box-shadow: 0 2px 5px rgba(229, 9, 20, 0.6);
-             transform: translateY(0);
-         }
+        /* Estilo para el LI activo (contenedor del botón activo) */
+        #playlist li.active {
+            background: linear-gradient(145deg, var(--primary-color), var(--primary-color-hover));
+            box-shadow: 0 2px 5px rgba(229, 9, 20, 0.6);
+            transform: translateY(0);
+        }
 
         .channel-info {
             display: flex;
@@ -284,15 +284,21 @@
         }
 
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                height: auto;
-                min-height: calc(100vh - 60px); /* Ajustar altura mínima */
-                padding: 0;
-                border-radius: 0;
-                margin: 60px 0 0 0; /* Header height */
-                box-shadow: none;
-                overflow: visible;
+             /* Ajustar margen superior del container y altura del header en móviles si el logo crece */
+             .header {
+                 /* Podrías querer ajustar el padding si 80px es muy alto para móvil */
+                 /* padding: 5px 10px; */
+             }
+             .container {
+                 margin: 100px 0 0 0; /* Aumentar margen superior (ej: 80px logo + 20px padding = 100px) */
+                 min-height: calc(100vh - 100px); /* Ajustar altura mínima */
+                 /* ... resto de estilos @media ... */
+                 flex-direction: column;
+                 height: auto;
+                 padding: 0;
+                 border-radius: 0;
+                 box-shadow: none;
+                 overflow: visible;
             }
 
             #player-container {
@@ -311,7 +317,7 @@
                 border-radius: 0;
                 padding: 10px;
                 box-shadow: none;
-                min-height: calc(55vh - 60px); /* Altura mínima restante */
+                min-height: calc(55vh - 100px); /* Altura mínima restante ajustada */
                 overflow-y: auto; /* Permitir scroll si es necesario */
             }
 
@@ -322,8 +328,7 @@
 </head>
 <body>
     <header class="header">
-        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjtH1eFwNcBk9FvfM8ozeG6zjDtvJR2j2CdfNtfn8rj0JP9PRWR7zeL_ayD_dwmmuqOe8-sTp-TcOGCVsg5yhUNBO_PqRVI9gCMu3B1x2MQ1ZsitAg-1NKxQ70x3H-O9eehSCsQO6DzLPxcB_uZpfGmfziYNcXQ0JylvrGY1PE-sc9nJ76l2c62PG3Kcvs/w457-h136/JORGEDEZ-19-3-2025.png" alt="JORGEDEZ Logo">
-    </header>
+        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgVIFxWI-sdOR2bVfpbgCotXquColWskv4u4I9HXZhYdsRewDVRNcJ7iLvtKO2xYucvqOv0DKY2MArMnHGF8IvZBI7NYjg0dkjHUN0N8VXwZ73vKjYOajWC6JTze5n1Hcj19V2COVFkN-TtJA7uR_ALIYyIcvUBOwQN1EmURskiBCI_lJK3hFphdSBuCaQ/s320/logo%20(%20JORGEDEZ%20)%20ROJO%20Y%20BLANCO%20PARA%20VIDEO.jpeg" alt="JORGEDEZ Logo">  </header>
 
     <div class="container">
         <div id="player-container">
@@ -468,9 +473,9 @@
                     descripcion: "Canal de noticias."
                 },
                 {
-                    title: "Canal IQ",
-                    url: "https://rtmp.info/iqtv/envivo/chunklist_w1932587350.m3u8",
-                    logo: "https://www.kolbi.cr/wps/wcm/connect/www.kolbi.cr/f9cd3117-e95c-4406-8f7f-e178cdef05b0/IQ-Channel.png?MOD=AJPERES&CACHEID=ROOTWORKSPACE.Z18_GG1AHCC0P8VB70QI79ARQL0000-f9cd3117-e95c-4406-8f7f-e178cdef05b0-oBgaIj2",
+                    title: "Buzzer Tv",
+                    url: "https://cdn.streamhispanatv.net:3297/live/buzzerradiolive.m3u8",
+                    logo: "https://static.wixstatic.com/media/7acae1_fafd7c471aee4a48a463323014970628~mv2.png/v1/fill/w_381,h_381,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Buzzertv.png",
                     descripcion: "Canal de entretenimiento."
                 },
                 {
@@ -534,9 +539,9 @@
                     descripcion: "Canal de películas clásicas latinas."
                 },
                 {
-                    title: "MIAMI TV",
-                    url: "https://59ec5453559f0.streamlock.net/JennyLive/_definst_/smil:41235/chunklist_w1924994432_b1896000.m3u8",
-                    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEzEB2GWG6aayElROaQBM_8F1Ii1F9eGGhRA&s",
+                    title: "Solo tv",
+                    url: "https://video03.logicahost.com.br/soltv/soltv/playlist.m3u8",
+                    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyeFcO1jqS7cHkeI6uFu8i1mXBb1hayIlshXespGXDMtv0YGhTBKzriaIGYUb4_TOMUd0&usqp=CAU",
                     descripcion: "Canal de noticias y entretenimiento de Miami."
                 },
                 {
@@ -628,6 +633,12 @@
                     url: "https://v2.azulstream.com:8081/gamtv/gamtv/tracks-v1a1/mono.m3u8",
                     logo: "https://radiocostarica.net/sites/default/files/styles/player_image/public/2024-06/GAM%20TV%20CR-Costa%20Rica_0.png.webp?itok=ExXxZFSr",
                     descripcion: "Entretenimiento"
+                },
+                { // <-- CANAL AÑADIDO
+                    title: "Claro Sports",
+                    url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/bein-sports-xtra-en-espanol/d3358062-b357-4738-9cfb-6824db0ada53/0.m3u8",
+                    logo: "https://yt3.googleusercontent.com/h88IKJCItR4KafxYzqfMphDkLzXdREH24qDrW-CzFMedCCjBl4D2baR3xWF48tOkNltM6MM9hA=s900-c-k-c0x00ffffff-no-rj",
+                    descripcion: "Canal de deportes."
                 }
                 // Añade más canales aquí si es necesario
             ];
@@ -654,7 +665,7 @@
                 errorMessage.textContent = message;
                 errorOverlay.style.display = 'flex';
                  if (hls) { // Detener cualquier instancia HLS activa
-                    hls.stopLoad();
+                     hls.stopLoad();
                  }
                  videoPlayer.pause(); // Pausar video nativo si estaba activo
                  console.error("Error mostrado:", message, "Canal:", channelIndex);
@@ -756,13 +767,13 @@
                 // Resaltar el canal activo después de renderizar (código existente)
                 const lastPlayed = localStorage.getItem('lastPlayedTvChannel');
                 if(lastPlayed !== null) {
-                     // Asegurarse que el índice sea válido antes de intentar resaltar/enfocar
-                     const lastPlayedIdx = parseInt(lastPlayed);
-                     if (!isNaN(lastPlayedIdx) && lastPlayedIdx >= 0 && lastPlayedIdx < channels.length) {
-                        setActiveChannelHighlight(lastPlayedIdx);
-                     } else {
+                    // Asegurarse que el índice sea válido antes de intentar resaltar/enfocar
+                    const lastPlayedIdx = parseInt(lastPlayed);
+                    if (!isNaN(lastPlayedIdx) && lastPlayedIdx >= 0 && lastPlayedIdx < channels.length) {
+                         setActiveChannelHighlight(lastPlayedIdx);
+                    } else {
                          localStorage.removeItem('lastPlayedTvChannel'); // Limpiar índice inválido
-                     }
+                    }
                 }
             }
 
@@ -844,7 +855,7 @@
                     hls.on(Hls.Events.ERROR, function(event, data) {
                         console.error('HLS Error:', data);
                         if (data.fatal) {
-                             switch(data.type) {
+                            switch(data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
                                     console.error('Error fatal de red HLS');
                                     // Intentar reconectar o mostrar error
@@ -864,7 +875,7 @@
                                     hls.destroy();
                                     hls = null;
                                     break;
-                             }
+                            }
                         } else {
                             // Errores no fatales (ej. timeout de fragmento) pueden ser manejados por HLS.js
                              console.warn('Error no fatal HLS:', data.details);
@@ -881,12 +892,12 @@
                              // el usuario necesitará interactuar, pero el stream está cargado.
                              // Podríamos mostrar un icono de play o un mensaje.
                              // El error overlay ya podría estar activo si hubo error antes.
-                            if (!errorOverlay.style.display || errorOverlay.style.display === 'none') {
-                                // No mostrar otro error si ya hay uno
-                                // Quitamos este showError automático para que no interfiera con el foco
-                                // showError("Haz clic en play para iniciar.", channelIndex);
-                                console.warn("Playback necesita interacción del usuario (autoplay bloqueado)");
-                            }
+                             if (!errorOverlay.style.display || errorOverlay.style.display === 'none') {
+                                 // No mostrar otro error si ya hay uno
+                                 // Quitamos este showError automático para que no interfiera con el foco
+                                 // showError("Haz clic en play para iniciar.", channelIndex);
+                                  console.warn("Playback necesita interacción del usuario (autoplay bloqueado)");
+                             }
                         });
                     });
 
@@ -899,11 +910,11 @@
                             console.error("Error al iniciar play() en nativo:", e);
                             // Quitamos este showError automático
                             // showError("Haz clic en play para iniciar.", channelIndex);
-                            console.warn("Playback necesita interacción del usuario (autoplay bloqueado)");
+                             console.warn("Playback necesita interacción del usuario (autoplay bloqueado)");
                          });
                     });
                      // Escuchar errores del elemento video directamente
-                    videoPlayer.addEventListener('error', handleVideoElementError);
+                     videoPlayer.addEventListener('error', handleVideoElementError);
 
                 } else {
                     console.warn("HLS no soportado directamente, intentando como video normal (puede fallar).");
@@ -941,10 +952,11 @@
             // Función de auto-scroll
             function scrollToPlayer() {
                  // Solo hacer scroll en pantallas pequeñas (móviles) donde la disposición es vertical
-                if (window.innerWidth <= 768) {
+                 if (window.innerWidth <= 768) {
                      const playerRect = playerContainer.getBoundingClientRect();
                      // Comprobar si el player está total o parcialmente fuera de la vista superior
-                     if (playerRect.top < 60) { // 60px es la altura del header
+                     if (playerRect.top < 60) { // 60px es la altura del header original, ajustamos con el media query
+                         // El scrollIntoView debería funcionar igual, el cálculo del media query ajusta el layout
                          playerContainer.scrollIntoView({
                              behavior: 'smooth',
                              block: 'start' // Alinear con la parte superior
@@ -967,58 +979,58 @@
             }
 
              // --- INICIO: Control de Volumen con Rueda del Ratón (DEPURACIÓN en Document) ---
-            document.addEventListener('wheel', (event) => {
-                // console.log('Evento Wheel detectado en DOCUMENT!'); // Comentado para reducir logs
+             document.addEventListener('wheel', (event) => {
+                 // console.log('Evento Wheel detectado en DOCUMENT!'); // Comentado para reducir logs
 
-                // Comprobar si el evento ocurrió DENTRO del playerContainer o sus hijos
-                if (playerContainer.contains(event.target)) {
-                    // console.log('El evento Wheel ocurrió DENTRO de playerContainer.'); // Comentado
-                    // console.log('Target del evento:', event.target); // Comentado
-                    // console.log('deltaY:', event.deltaY); // Comentado
+                 // Comprobar si el evento ocurrió DENTRO del playerContainer o sus hijos
+                 if (playerContainer.contains(event.target)) {
+                     // console.log('El evento Wheel ocurrió DENTRO de playerContainer.'); // Comentado
+                     // console.log('Target del evento:', event.target); // Comentado
+                     // console.log('deltaY:', event.deltaY); // Comentado
 
-                    // Prevenir el scroll normal de la página SOLO si estamos sobre el player
-                    event.preventDefault();
+                     // Prevenir el scroll normal de la página SOLO si estamos sobre el player
+                     event.preventDefault();
 
-                    const volumeStep = 0.05;
-                    let newVolume;
+                     const volumeStep = 0.05;
+                     let newVolume;
 
-                    if (event.deltaY < 0) { // deltaY < 0 es rueda hacia arriba/adelante
-                        // console.log('Intento de SUBIR volumen'); // Comentado
-                        newVolume = Math.min(1, parseFloat((videoPlayer.volume + volumeStep).toFixed(2)));
-                    } else if (event.deltaY > 0) { // deltaY > 0 es rueda hacia abajo/atrás
-                        // console.log('Intento de BAJAR volumen'); // Comentado
-                        newVolume = Math.max(0, parseFloat((videoPlayer.volume - volumeStep).toFixed(2)));
-                    } else {
-                        // console.log('Movimiento de rueda sin deltaY vertical.'); // Comentado
-                        return; // No hacemos nada si no hay movimiento vertical
-                    }
+                     if (event.deltaY < 0) { // deltaY < 0 es rueda hacia arriba/adelante
+                         // console.log('Intento de SUBIR volumen'); // Comentado
+                         newVolume = Math.min(1, parseFloat((videoPlayer.volume + volumeStep).toFixed(2)));
+                     } else if (event.deltaY > 0) { // deltaY > 0 es rueda hacia abajo/atrás
+                         // console.log('Intento de BAJAR volumen'); // Comentado
+                         newVolume = Math.max(0, parseFloat((videoPlayer.volume - volumeStep).toFixed(2)));
+                     } else {
+                         // console.log('Movimiento de rueda sin deltaY vertical.'); // Comentado
+                         return; // No hacemos nada si no hay movimiento vertical
+                     }
 
-                    videoPlayer.volume = newVolume;
-                    videoPlayer.muted = false;
+                     videoPlayer.volume = newVolume;
+                     videoPlayer.muted = false;
 
-                    console.log(`Volumen (rueda) establecido a: ${Math.round(videoPlayer.volume * 100)}%`); // Mantenemos este log
+                     console.log(`Volumen (rueda) establecido a: ${Math.round(videoPlayer.volume * 100)}%`); // Mantenemos este log
 
-                } else {
-                    // Si el evento ocurrió fuera del player, no hacemos nada y no prevenimos el scroll
-                    // console.log('El evento Wheel ocurrió FUERA de playerContainer.');
-                }
+                 } else {
+                     // Si el evento ocurrió fuera del player, no hacemos nada y no prevenimos el scroll
+                     // console.log('El evento Wheel ocurrió FUERA de playerContainer.');
+                 }
 
-            }, { passive: false }); // { passive: false } para poder usar preventDefault
-            // --- FIN: Control de Volumen con Rueda del Ratón ---
+             }, { passive: false }); // { passive: false } para poder usar preventDefault
+             // --- FIN: Control de Volumen con Rueda del Ratón ---
 
 
-            // --- INICIO: Control Remoto por Teclado / Mando TV ---
-            document.addEventListener('keydown', (event) => {
+             // --- INICIO: Control Remoto por Teclado / Mando TV ---
+             document.addEventListener('keydown', (event) => {
                  console.log(`Tecla presionada: ${event.key}`); // Log para ver qué tecla llega
-                if (event.target.tagName === 'INPUT' || event.target.isContentEditable) {
-                    console.log("Foco en input, ignorando tecla.");
-                    return; // Ignorar teclas si se está en un input
-                }
-                let preventDefault = true;
-                switch (event.key) {
-                    case ' ': // Barra Espaciadora
-                    case 'Enter': // Tecla Enter/OK en muchos controles remotos
-                    case 'Ok': // Algunos controles envían 'Ok' (estándar antiguo)
+                 if (event.target.tagName === 'INPUT' || event.target.isContentEditable) {
+                     console.log("Foco en input, ignorando tecla.");
+                     return; // Ignorar teclas si se está en un input
+                 }
+                 let preventDefault = true;
+                 switch (event.key) {
+                     case ' ': // Barra Espaciadora
+                     case 'Enter': // Tecla Enter/OK en muchos controles remotos
+                     case 'Ok': // Algunos controles envían 'Ok' (estándar antiguo)
                          // Si el elemento enfocado es un botón de canal, simula un click
                          if (document.activeElement && document.activeElement.classList.contains('channel-button')) {
                              console.log("Enter/OK presionado en botón de canal, simulando click.");
@@ -1026,92 +1038,92 @@
                          } else {
                              // Si no está enfocado en un botón de canal, hace Play/Pause
                              console.log("Enter/OK/Espacio presionado fuera de botón, haciendo Play/Pause.");
-                            if (videoPlayer.paused) {
-                                videoPlayer.play().catch(e => console.error("Error al reproducir:", e));
-                            } else {
-                                videoPlayer.pause();
-                            }
-                         }
-                        break;
-                    case 'ArrowUp': // Flecha Arriba
-                        // Si el foco está dentro de la playlist, no ajustar volumen, permitir navegación
-                        if (!playlistContainer.contains(document.activeElement)) {
-                             console.log("Foco fuera de playlist, subiendo volumen.");
-                            const newVolumeUp = Math.min(1, parseFloat((videoPlayer.volume + 0.1).toFixed(1)));
-                            videoPlayer.volume = newVolumeUp;
-                            videoPlayer.muted = false; // Quitar silencio
-                            console.log(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`);
-                        } else {
-                             console.log("Foco en playlist, permitiendo navegación Arriba.");
-                            preventDefault = false; // Permitir que el navegador mueva el foco
-                        }
-                        break;
-                    case 'ArrowDown': // Flecha Abajo
-                        // Si el foco está dentro de la playlist, no ajustar volumen, permitir navegación
-                         if (!playlistContainer.contains(document.activeElement)) {
-                              console.log("Foco fuera de playlist, bajando volumen.");
-                            const newVolumeDown = Math.max(0, parseFloat((videoPlayer.volume - 0.1).toFixed(1)));
-                            videoPlayer.volume = newVolumeDown;
-                            videoPlayer.muted = false; // Quitar silencio
-                            console.log(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`);
-                        } else {
-                              console.log("Foco en playlist, permitiendo navegación Abajo.");
-                            preventDefault = false; // Permitir que el navegador mueva el foco
-                        }
-                        break;
-                    case 'ArrowRight': // Flecha Derecha
-                         // Si el foco está dentro de la playlist, no buscar, permitir navegación
-                         if (!playlistContainer.contains(document.activeElement)) {
-                              console.log("Foco fuera de playlist, adelantando video.");
-                            videoPlayer.currentTime += 5; // Adelantar 5s
-                         } else {
-                              console.log("Foco en playlist, permitiendo navegación Derecha (si aplica).");
-                            preventDefault = false; // Permitir que el navegador mueva el foco
-                         }
-                        break;
-                    case 'ArrowLeft': // Flecha Izquierda
-                         // Si el foco está dentro de la playlist, no buscar, permitir navegación
-                         if (!playlistContainer.contains(document.activeElement)) {
-                              console.log("Foco fuera de playlist, retrocediendo video.");
-                             videoPlayer.currentTime -= 5; // Retroceder 5s
-                         } else {
-                              console.log("Foco en playlist, permitiendo navegación Izquierda (si aplica).");
-                            preventDefault = false; // Permitir que el navegador mueva el foco
-                         }
-                        break;
-                    case 'm': case 'M': // Tecla M (Puede no estar en el mando)
-                        videoPlayer.muted = !videoPlayer.muted;
-                        console.log(`Silenciado: ${videoPlayer.muted}`);
-                        break;
-                    case 'f': case 'F': // Tecla F (Puede no estar en el mando)
-                        if (!document.fullscreenElement) {
-                            playerContainer.requestFullscreen().catch(err => {
-                                alert(`Error al entrar en pantalla completa: ${err.message}`);
-                            });
-                        } else {
-                            document.exitFullscreen();
-                        }
-                        break;
-                    // PageUp/PageDown pueden no funcionar con el mando, mejor usar flechas
-                    // case 'PageUp': changeChannel(-1); break;
-                    // case 'PageDown': changeChannel(1); break;
-
-                    // Podrías añadir teclas específicas de mandos si las conoces (ej. MediaPlayPause)
-                    case 'MediaPlayPause':
-                         console.log("Tecla MediaPlayPause detectada.");
-                         if (videoPlayer.paused) {
-                             videoPlayer.play().catch(e => console.error("Error al reproducir:", e));
-                         } else {
-                             videoPlayer.pause();
+                             if (videoPlayer.paused) {
+                                 videoPlayer.play().catch(e => console.error("Error al reproducir:", e));
+                             } else {
+                                 videoPlayer.pause();
+                             }
                          }
                          break;
-                     case 'MediaStop':
+                     case 'ArrowUp': // Flecha Arriba
+                         // Si el foco está dentro de la playlist, no ajustar volumen, permitir navegación
+                         if (!playlistContainer.contains(document.activeElement)) {
+                             console.log("Foco fuera de playlist, subiendo volumen.");
+                             const newVolumeUp = Math.min(1, parseFloat((videoPlayer.volume + 0.1).toFixed(1)));
+                             videoPlayer.volume = newVolumeUp;
+                             videoPlayer.muted = false; // Quitar silencio
+                             console.log(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`);
+                         } else {
+                             console.log("Foco en playlist, permitiendo navegación Arriba.");
+                             preventDefault = false; // Permitir que el navegador mueva el foco
+                         }
+                         break;
+                     case 'ArrowDown': // Flecha Abajo
+                         // Si el foco está dentro de la playlist, no ajustar volumen, permitir navegación
+                          if (!playlistContainer.contains(document.activeElement)) {
+                             console.log("Foco fuera de playlist, bajando volumen.");
+                             const newVolumeDown = Math.max(0, parseFloat((videoPlayer.volume - 0.1).toFixed(1)));
+                             videoPlayer.volume = newVolumeDown;
+                             videoPlayer.muted = false; // Quitar silencio
+                             console.log(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`);
+                         } else {
+                             console.log("Foco en playlist, permitiendo navegación Abajo.");
+                             preventDefault = false; // Permitir que el navegador mueva el foco
+                         }
+                         break;
+                     case 'ArrowRight': // Flecha Derecha
+                         // Si el foco está dentro de la playlist, no buscar, permitir navegación
+                          if (!playlistContainer.contains(document.activeElement)) {
+                             console.log("Foco fuera de playlist, adelantando video.");
+                             videoPlayer.currentTime += 5; // Adelantar 5s
+                         } else {
+                             console.log("Foco en playlist, permitiendo navegación Derecha (si aplica).");
+                             preventDefault = false; // Permitir que el navegador mueva el foco
+                         }
+                         break;
+                     case 'ArrowLeft': // Flecha Izquierda
+                         // Si el foco está dentro de la playlist, no buscar, permitir navegación
+                          if (!playlistContainer.contains(document.activeElement)) {
+                             console.log("Foco fuera de playlist, retrocediendo video.");
+                              videoPlayer.currentTime -= 5; // Retroceder 5s
+                         } else {
+                             console.log("Foco en playlist, permitiendo navegación Izquierda (si aplica).");
+                             preventDefault = false; // Permitir que el navegador mueva el foco
+                         }
+                         break;
+                     case 'm': case 'M': // Tecla M (Puede no estar en el mando)
+                         videoPlayer.muted = !videoPlayer.muted;
+                         console.log(`Silenciado: ${videoPlayer.muted}`);
+                         break;
+                     case 'f': case 'F': // Tecla F (Puede no estar en el mando)
+                         if (!document.fullscreenElement) {
+                             playerContainer.requestFullscreen().catch(err => {
+                                 alert(`Error al entrar en pantalla completa: ${err.message}`);
+                             });
+                         } else {
+                             document.exitFullscreen();
+                         }
+                         break;
+                     // PageUp/PageDown pueden no funcionar con el mando, mejor usar flechas
+                     // case 'PageUp': changeChannel(-1); break;
+                     // case 'PageDown': changeChannel(1); break;
+
+                     // Podrías añadir teclas específicas de mandos si las conoces (ej. MediaPlayPause)
+                     case 'MediaPlayPause':
+                         console.log("Tecla MediaPlayPause detectada.");
+                         if (videoPlayer.paused) {
+                              videoPlayer.play().catch(e => console.error("Error al reproducir:", e));
+                         } else {
+                              videoPlayer.pause();
+                         }
+                         break;
+                      case 'MediaStop':
                           console.log("Tecla MediaStop detectada.");
                           videoPlayer.pause();
                           videoPlayer.currentTime = 0;
                           break;
-                     // 'Backspace' o un botón 'Back' específico podría usarse para salir de pantalla completa o ir "atrás"
-                     case 'Backspace':
+                      // 'Backspace' o un botón 'Back' específico podría usarse para salir de pantalla completa o ir "atrás"
+                      case 'Backspace':
                           console.log("Tecla Backspace detectada.");
                           if (document.fullscreenElement) {
                               document.exitFullscreen();
@@ -1123,31 +1135,31 @@
                           }
                           break;
 
-                    default:
-                        preventDefault = false; // No prevenir acción para otras teclas
-                        break;
-                }
-                if (preventDefault) {
-                    event.preventDefault();
-                }
-            });
+                     default:
+                         preventDefault = false; // No prevenir acción para otras teclas
+                         break;
+                 }
+                 if (preventDefault) {
+                     event.preventDefault();
+                 }
+             });
 
             // Función auxiliar para cambiar de canal con teclado (Ya no se usa con PageUp/Down)
             /* function changeChannel(direction) {
-                let currentChannelIndex = parseInt(localStorage.getItem('lastPlayedTvChannel') || '0');
-                let totalChannels = channels.length;
-                if (isNaN(currentChannelIndex) || currentChannelIndex < 0 || currentChannelIndex >= totalChannels) {
-                    currentChannelIndex = 0;
-                }
-                let nextChannelIndex = (currentChannelIndex + direction + totalChannels) % totalChannels;
-                if (channels[nextChannelIndex]) {
-                    console.log(`Cambiando a canal (Índice: ${nextChannelIndex}): ${channels[nextChannelIndex].title}`);
-                    selectChannel(nextChannelIndex);
-                } else {
-                     console.warn(`Índice de canal inválido calculado: ${nextChannelIndex}`);
-                }
-            } */
-            // --- FIN: Control Remoto por Teclado / Mando TV ---
+                 let currentChannelIndex = parseInt(localStorage.getItem('lastPlayedTvChannel') || '0');
+                 let totalChannels = channels.length;
+                 if (isNaN(currentChannelIndex) || currentChannelIndex < 0 || currentChannelIndex >= totalChannels) {
+                     currentChannelIndex = 0;
+                 }
+                 let nextChannelIndex = (currentChannelIndex + direction + totalChannels) % totalChannels;
+                 if (channels[nextChannelIndex]) {
+                     console.log(`Cambiando a canal (Índice: ${nextChannelIndex}): ${channels[nextChannelIndex].title}`);
+                     selectChannel(nextChannelIndex);
+                 } else {
+                      console.warn(`Índice de canal inválido calculado: ${nextChannelIndex}`);
+                 }
+             } */
+             // --- FIN: Control Remoto por Teclado / Mando TV ---
 
             // Búsqueda de canales
             searchInput.addEventListener('input', (e) => {
@@ -1158,10 +1170,10 @@
                 );
                 renderPlaylist(filtered);
                  // Restaurar highlight si el canal activo está en los resultados filtrados
-                const lastPlayed = localStorage.getItem('lastPlayedTvChannel');
-                 if (lastPlayed !== null && filtered.some((ch, idx) => channels.findIndex(orig => orig.title === ch.title) === parseInt(lastPlayed))) {
-                    setActiveChannelHighlight(parseInt(lastPlayed));
-                }
+                 const lastPlayed = localStorage.getItem('lastPlayedTvChannel');
+                  if (lastPlayed !== null && filtered.some((ch, idx) => channels.findIndex(orig => orig.title === ch.title) === parseInt(lastPlayed))) {
+                      setActiveChannelHighlight(parseInt(lastPlayed));
+                 }
             });
 
             // Inicializar
@@ -1172,11 +1184,11 @@
             if (lastPlayedIndexStr !== null) {
                  const lastPlayedIndex = parseInt(lastPlayedIndexStr);
                  if (!isNaN(lastPlayedIndex) && lastPlayedIndex >= 0 && lastPlayedIndex < channels.length) {
-                    // Llama a selectChannel, que ahora internamente llama a setActive... y focus
-                    selectChannel(lastPlayedIndex);
+                     // Llama a selectChannel, que ahora internamente llama a setActive... y focus
+                     selectChannel(lastPlayedIndex);
                  } else {
-                     console.warn("Índice del último canal guardado es inválido. No se cargará.");
-                      localStorage.removeItem('lastPlayedTvChannel'); // Limpiar índice inválido
+                      console.warn("Índice del último canal guardado es inválido. No se cargará.");
+                       localStorage.removeItem('lastPlayedTvChannel'); // Limpiar índice inválido
                  }
             } else {
                  // Si no hay último canal, quizás enfocar el primer botón de la lista por defecto?
