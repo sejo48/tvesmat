@@ -25,12 +25,17 @@
 
         /* Basic body styling */
         body {
-            font-family: 'Arial', sans-serif;
+            /* Improved system font stack for better cross-platform rendering */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             margin: 0;
             padding: 0;
             background-color: var(--background-color);
             color: var(--text-color);
             overflow: hidden; /* Prevent body scrollbars */
+            /* Optimize text rendering for legibility */
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased; /* Smoother fonts on WebKit */
+            -moz-osx-font-smoothing: grayscale; /* Smoother fonts on Firefox */
         }
 
         /* Header styling */
@@ -127,7 +132,7 @@
             margin-top: 0;
             margin-bottom: 10px;
             text-align: center;
-            font-size: 1.1em;
+            font-size: 1.1em; /* Kept original size */
         }
 
         /* Search input styling */
@@ -139,7 +144,7 @@
             border: 1px solid var(--card-bg-start);
             background-color: var(--card-bg-end);
             color: var(--text-color);
-            font-size: 0.9em;
+            font-size: 0.9em; /* Kept original size */
         }
         #search::placeholder { color: #ccc; }
         #search:focus {
@@ -197,20 +202,24 @@
             flex-shrink: 0; /* Prevent logo shrinking */
             object-fit: cover; /* Cover ensures image fills space */
             border: 1px solid rgba(255, 255, 255, 0.1);
+            /* Optional: Hint for image rendering (auto is usually fine) */
+            /* image-rendering: auto; */
         }
         .channel-details { overflow: hidden; } /* Hide overflowing text */
         .channel-title {
-            font-size: 0.85em;
+            /* Slightly larger font size for TV viewing */
+            font-size: 0.9em;
             font-weight: 500;
             color: var(--text-color);
             display: block;
             white-space: nowrap; /* Prevent title wrapping */
             overflow: hidden;
             text-overflow: ellipsis; /* Add ... for long titles */
-            line-height: 1.2;
+            line-height: 1.3; /* Slightly increased line height */
         }
         .channel-desc {
-            font-size: 0.65em;
+             /* Slightly larger font size for TV viewing */
+            font-size: 0.7em;
             color: #bbb;
             margin: 1px 0 0 0;
             white-space: nowrap;
@@ -365,13 +374,13 @@
                 {
                     "title": "Retro Tv",
                     "url": "https://retromusictv.streamtech.com.co:5443/retromusic/streams/zNDymkVySau6UBcU381637625188.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=R", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=R", // Placeholder
                     "descripcion": "Música retro"
                 },
                 {
                     "title": "Tele clásica",
                     "url": "https://ssh101stream.ssh101.com/akamaissh101/ssh101/teleclasik/chunks.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=T", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=T", // Placeholder
                     "descripcion": "Películas clásicas"
                 },
                 {
@@ -479,13 +488,13 @@
                 {
                     "title": "Las Estrellas en vivo",
                     "url": "https://channel01-onlymex.akamaized.net/hls/live/2022749/event01/index_1.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=E", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=E", // Placeholder
                     "descripcion": "Entretenimiento y noticias"
                 },
                 {
                     "title": "Telemundo en vivo",
                     "url": "https://nbcu-telemundoflorida-firetv.amagi.tv/playlist1080.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=T", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=T", // Placeholder
                     "descripcion": "Noticias y entretenimiento"
                 },
                 {
@@ -545,7 +554,7 @@
                 {
                     "title": "Canal Dreiko TV",
                     "url": "https://rtv.fullhd-streaming.com:19360/dreikotv/dreikotv.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=D", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=D", // Placeholder
                     "descripcion": "Entretenimiento"
                 },
                 {
@@ -575,7 +584,7 @@
                 {
                     "title": "Extra tv",
                     "url": "https://d2axu5ozwr5gk0.cloudfront.net/live_0.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=E", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=E", // Placeholder
                     "descripcion": "Deportes y noticias"
                 },
                 {
@@ -587,7 +596,7 @@
                 {
                     "title": "Canal 8",
                     "url": "https://mdstrm.com/live-stream-playlist/5a7b1e63a8da282c34d65445/master.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=8", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=8", // Placeholder
                     "descripcion": "Multimedios Costa Rica"
                 },
                 {
@@ -605,7 +614,7 @@
                 {
                     "title": "Claro Sports",
                     "url": "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/bein-sports-xtra-en-espanol/d3358062-b357-4738-9cfb-6824db0ada53/0.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=C", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=C", // Placeholder
                     "descripcion": "Deportes"
                 },
                 {
@@ -629,7 +638,7 @@
                 {
                     "title": "Retro Plus TV",
                     "url": "https://scl.edge.grupoz.cl/retroplus16@grupoz.cl_retrolive/live/playlist.m3u8",
-                    "logo": "https://placehold.co/35x35/222/fff?text=R", // Placeholder
+                    "logo": "https://placehold.co/56x56/222/fff?text=R", // Placeholder
                     "descripcion": "Retro Plus"
                 }
             ];
@@ -705,7 +714,7 @@
                 if (isPlaylistVisible) hidePlaylist(); else showPlaylist();
             }
 
-            // --- Playlist Rendering (same as before) ---
+            // --- Playlist Rendering (Adapted onerror placeholder size) ---
              function renderPlaylist(channelsToRender = channels) {
                 playlistElement.innerHTML = ''; // Clear existing list
                 const sortedChannels = [...channelsToRender].sort((a, b) => {
@@ -728,9 +737,10 @@
                     const channelButton = document.createElement('button');
                     channelButton.classList.add('channel-button');
                     channelButton.type = 'button';
+                    // Use larger placeholder for onerror
                     channelButton.innerHTML = `
                         <div class="channel-info">
-                            <img src="${channel.logo}" alt="${channel.title}" onerror="this.onerror=null; this.src='https://placehold.co/35x35/222/fff?text=${channel.title.charAt(0)}';">
+                            <img src="${channel.logo}" alt="${channel.title}" onerror="this.onerror=null; this.src='https://placehold.co/56x56/222/fff?text=${channel.title.charAt(0)}';">
                             <div class="channel-details">
                                 <span class="channel-title">${channel.title}</span>
                                 <p class="channel-desc">${channel.descripcion}</p>
@@ -785,50 +795,26 @@
                 focusCurrentOrFirstChannel();
             }
 
-            // --- Focus Management & Centered Scrolling ---
-
-            /**
-             * Scrolls the playlist container to keep the target element centered vertically.
-             * @param {HTMLElement} element - The element (channel button or star) to center.
-             */
+            // --- Focus Management & Centered Scrolling (same as before) ---
             function scrollToCenter(element) {
                 if (!element || !playlistElement) return;
-
                 const elementRect = element.getBoundingClientRect();
                 const playlistRect = playlistElement.getBoundingClientRect();
-                // Calculate the desired top position relative to the playlist container's viewport
                 const desiredTop = playlistRect.height / 2 - elementRect.height / 2;
-                // Calculate the element's offset from the top of the scrollable content
-                const elementOffsetTop = element.offsetTop; // Position relative to the parent UL
-
-                // Calculate the target scroll position
+                const elementOffsetTop = element.offsetTop;
                 const targetScrollTop = elementOffsetTop - desiredTop;
-
-                // Use smooth scrolling
                 playlistElement.scrollTo({
                     top: targetScrollTop,
                     behavior: 'smooth'
                 });
                  console.log(`Scrolling to center ${element.tagName}`);
             }
-
-            /**
-             * Sets focus on an element and scrolls it to the center of the playlist.
-             * @param {HTMLElement} element - The element to focus and center.
-             */
              function focusAndScrollToCenter(element) {
                  if(element) {
                     element.focus();
-                    scrollToCenter(element.closest('li')); // Scroll the parent li to center
+                    scrollToCenter(element.closest('li'));
                  }
              }
-
-
-            /**
-             * Sets focus on a specific channel button and scrolls it to the center.
-             * @param {number} index - The original index of the channel to focus.
-             * @returns {boolean} - True if focus was successfully set, false otherwise.
-             */
             function focusChannelButton(index) {
                 const targetButton = playlistElement.querySelector(`li[data-original-index="${index}"] .channel-button`);
                 if (targetButton) {
@@ -839,8 +825,6 @@
                 console.log(`Botón para canal índice ${index} no encontrado/visible.`);
                 return false;
             }
-
-            /** Sets focus on the first visible channel button and scrolls it to the center. */
             function focusFirstVisibleChannel() {
                 const firstButton = playlistElement.querySelector('.channel-button');
                 if (firstButton) {
@@ -851,8 +835,6 @@
                 console.log("No hay canales visibles para enfocar.");
                 return false;
             }
-
-            /** Tries to focus the currently selected channel, otherwise focuses the first visible one, scrolling to center. */
             function focusCurrentOrFirstChannel() {
                 if (!isPlaylistVisible) return;
                 if (currentChannelIndex !== -1) {
@@ -862,50 +844,37 @@
                 }
                 focusFirstVisibleChannel();
             }
-
-            /**
-             * Moves focus up or down within the visible playlist items and scrolls to center.
-             * @param {number} direction - 1 for down, -1 for up.
-             */
             function navigateListFocus(direction) {
                 const visibleButtons = Array.from(playlistElement.querySelectorAll('.channel-button'));
                 if (visibleButtons.length === 0) return;
-
                 let currentFocusIndex = -1;
                 for(let i = 0; i < visibleButtons.length; i++) {
-                    // Check focus on button or its corresponding star
                     const li = visibleButtons[i].closest('li');
                     if (li && li.contains(document.activeElement)) {
                          currentFocusIndex = i;
                          break;
                     }
                 }
-
                 let nextFocusIndex;
                 if (currentFocusIndex === -1) {
-                    // If no focus, or focus outside list items, start from top/bottom
                     const searchFocused = document.activeElement === searchInput;
-                    if(searchFocused && direction < 0) { // If search focused and pressing up, focus last item
+                    if(searchFocused && direction < 0) {
                          nextFocusIndex = visibleButtons.length -1;
-                    } else { // Otherwise start from top or bottom
+                    } else {
                         nextFocusIndex = direction > 0 ? 0 : visibleButtons.length - 1;
                     }
                 } else {
                     nextFocusIndex = (currentFocusIndex + direction + visibleButtons.length) % visibleButtons.length;
                 }
-
                 if (visibleButtons[nextFocusIndex]) {
-                    // Focus the button and scroll its parent li to center
                     focusAndScrollToCenter(visibleButtons[nextFocusIndex]);
                 } else if (direction > 0 && visibleButtons.length > 0) {
-                    // If moving down from last item, maybe focus search? (Optional)
+                    // Optional: focus search when moving down from last item
                     // searchInput.focus();
                 } else if (direction < 0 && visibleButtons.length > 0) {
-                     // If moving up from first item, focus search
-                     searchInput.focus(); // Focus search input when moving up from the first channel
+                     searchInput.focus();
                 }
             }
-
 
             // --- Channel Selection and Playback (same as before) ---
             function selectChannel(index) {
@@ -1009,20 +978,16 @@
                 console.log(`Tecla presionada: ${event.key}, Foco actual: ${document.activeElement.tagName}.${document.activeElement.id || document.activeElement.className}`);
 
                 if (document.activeElement === searchInput) {
-                     // Allow typing in search, but handle Up/Down/Enter
                     if (event.key === 'ArrowDown') {
-                        navigateListFocus(1); // Move focus to first list item
+                        navigateListFocus(1);
                         event.preventDefault();
                     } else if (event.key === 'Enter' || event.key === 'Ok') {
-                        event.preventDefault(); // Prevent potential form submission
-                        // Optionally trigger search or move focus
+                        event.preventDefault();
                         focusFirstVisibleChannel();
                     } else if (event.key === 'ArrowUp') {
-                         // Prevent default scroll, do nothing or focus last item?
                          event.preventDefault();
-                         navigateListFocus(-1); // Move focus to last list item
+                         navigateListFocus(-1);
                     }
-                    // Allow other keys (letters, backspace, etc.)
                     return;
                 }
 
@@ -1043,24 +1008,21 @@
                 const activeElementIsButton = document.activeElement.classList.contains('channel-button');
                 const activeElementIsStar = document.activeElement.classList.contains('star');
 
-
                 switch (event.key) {
-                    // Playback controls remain the same
                     case ' ': case 'MediaPlayPause': togglePlayPause(); break;
                     case 'MediaStop': videoPlayer.pause(); videoPlayer.currentTime = 0; break;
                     case 'm': case 'M': videoPlayer.muted = !videoPlayer.muted; console.log(`Silenciado: ${videoPlayer.muted}`); break;
                     case 'f': case 'F': toggleFullscreen(); break;
 
-                    // Navigation / Interaction
                     case 'Enter': case 'Ok':
                         console.log("Tecla Enter/OK presionada.");
                         if (isPlaylistVisible) {
                             if (activeElementIsButton) {
                                 console.log("...en botón de canal: Seleccionando y ocultando lista.");
-                                document.activeElement.click(); // Select channel
+                                document.activeElement.click();
                             } else if (activeElementIsStar) {
                                 console.log("...en estrella: Dejando que el handler de la estrella actúe.");
-                                preventDefault = false; // Let star's keydown handle it
+                                preventDefault = false;
                             } else {
                                 console.log("...lista visible, foco fuera de items: Ocultando lista.");
                                 hidePlaylist();
@@ -1075,7 +1037,7 @@
                         console.log("Tecla Flecha Arriba:");
                         if (isPlaylistVisible) {
                             console.log("...navegando lista arriba.");
-                            navigateListFocus(-1); // Will handle focus and scroll
+                            navigateListFocus(-1);
                         } else {
                             console.log("...lista oculta, subiendo volumen.");
                             adjustVolume(0.1);
@@ -1086,7 +1048,7 @@
                         console.log("Tecla Flecha Abajo:");
                         if (isPlaylistVisible) {
                             console.log("...navegando lista abajo.");
-                            navigateListFocus(1); // Will handle focus and scroll
+                            navigateListFocus(1);
                         } else {
                             console.log("...lista oculta, bajando volumen.");
                             adjustVolume(-0.1);
@@ -1102,7 +1064,7 @@
                             const star = document.activeElement.parentElement.querySelector('.star');
                             if (star) {
                                 console.log("...moviendo foco de botón a estrella.");
-                                focusAndScrollToCenter(star); // Focus star, keep li centered
+                                focusAndScrollToCenter(star);
                             } else preventDefault = false;
                         } else {
                             console.log("...permitiendo comportamiento por defecto.");
@@ -1119,7 +1081,7 @@
                             const button = document.activeElement.parentElement.querySelector('.channel-button');
                             if (button) {
                                 console.log("...moviendo foco de estrella a botón.");
-                                focusAndScrollToCenter(button); // Focus button, keep li centered
+                                focusAndScrollToCenter(button);
                             } else preventDefault = false;
                         } else {
                             console.log("...permitiendo comportamiento por defecto.");
