@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Smart TV M3U v8</title> <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Reproductor Smart TV M3U v12</title> <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
             --primary-bg: #121212;
@@ -18,6 +18,7 @@
             --border-radius: 4px;
             --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             --transition-speed: 0.3s;
+            --controls-transition-speed: 0.2s;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,7 +31,7 @@
             background-color: var(--secondary-bg);
             height: 100%;
             overflow: hidden;
-            transition: transform var(--transition-speed) ease-in-out, width var(--transition-speed) ease-in-out, min-width var(--transition-speed) ease-in-out, padding var(--transition-speed) ease-in-out, border var(--transition-speed) ease-in-out; /* Añadir transiciones para suavizar */
+            transition: transform var(--transition-speed) ease-in-out, width var(--transition-speed) ease-in-out, min-width var(--transition-speed) ease-in-out, padding var(--transition-speed) ease-in-out, border var(--transition-speed) ease-in-out;
             z-index: 10;
             border-right: 1px solid var(--tertiary-bg);
             display: flex;
@@ -47,53 +48,20 @@
             overflow: hidden;
         }
 
-        .sidebar-header {
-            padding: 10px 15px; /* Ajustar padding */
-            border-bottom: 1px solid var(--tertiary-bg);
-            transition: padding var(--transition-speed), border var(--transition-speed), height var(--transition-speed), opacity var(--transition-speed);
-            display: flex; /* Usar Flexbox */
-            align-items: center; /* Centrar verticalmente */
-            justify-content: center; /* Centrar horizontalmente */
-            gap: 10px; /* Espacio entre logo y contador */
-            height: 70px; /* Altura fija para evitar saltos */
-            opacity: 1;
-        }
+        .sidebar-header { padding: 10px 15px; border-bottom: 1px solid var(--tertiary-bg); transition: padding var(--transition-speed), border var(--transition-speed), height var(--transition-speed), opacity var(--transition-speed); display: flex; align-items: center; justify-content: center; gap: 10px; height: 70px; opacity: 1; flex-shrink: 0; }
         #sidebar.hidden .sidebar-header { padding: 0; border: none; height: 0; opacity: 0; overflow: hidden; }
-
-        .app-logo {
-            max-width: 70%; /* Ajustar tamaño */
-            max-height: 40px; /* Ajustar altura */
-            object-fit: contain;
-            display: block; /* Asegurar que sea bloque */
-        }
-
-        .channel-count {
-            background-color: var(--tertiary-bg);
-            color: var(--text-color);
-            font-size: 0.75em; /* Tamaño pequeño */
-            font-weight: bold;
-            border-radius: 50%; /* Círculo */
-            width: 28px; /* Tamaño fijo */
-            height: 28px;
-            display: inline-flex; /* Usar flex para centrar número */
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            flex-shrink: 0; /* Evitar que se encoja */
-            transition: opacity var(--transition-speed);
-        }
-        #sidebar.hidden .channel-count { opacity: 0; } /* Ocultar contador */
-
+        .app-logo { max-width: 70%; max-height: 40px; object-fit: contain; display: block; }
+        .channel-count { background-color: var(--tertiary-bg); color: var(--text-color); font-size: 0.75em; font-weight: bold; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; transition: opacity var(--transition-speed); }
+        #sidebar.hidden .channel-count { opacity: 0; }
 
         .channel-list-container { flex-grow: 1; overflow-y: auto; transition: opacity var(--transition-speed); }
          #sidebar.hidden .channel-list-container { opacity: 0; }
-
         .channel-list-container::-webkit-scrollbar { width: 8px; }
         .channel-list-container::-webkit-scrollbar-track { background: var(--secondary-bg); }
         .channel-list-container::-webkit-scrollbar-thumb { background-color: var(--tertiary-bg); border-radius: 4px; }
         .channel-list-container::-webkit-scrollbar-thumb:hover { background-color: #555; }
         .channel-list { list-style: none; padding: 0; }
-        .channel-item { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid var(--tertiary-bg); transition: background-color 0.15s ease-out; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary-color); }
+        .channel-item { display: flex; align-items: center; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--tertiary-bg); transition: background-color 0.15s ease-out; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary-color); }
         .channel-item:last-child { border-bottom: none; }
         .channel-logo { width: 32px; height: 32px; margin-right: 12px; object-fit: contain; flex-shrink: 0; background-color: rgba(255, 255, 255, 0.1); border-radius: var(--border-radius); vertical-align: middle; }
         .channel-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
@@ -102,10 +70,40 @@
         .channel-item.selected .channel-name { color: var(--primary-bg); }
         .channel-item.selected:hover { background-color: #1aa34a; }
 
-        .player-content { flex-grow: 1; height: 100%; display: flex; flex-direction: column; position: relative; background-color: #000; }
-        #videoPlayer { width: 100%; height: 100%; flex-grow: 1; background-color: #000; display: block; object-fit: contain; }
-        .controls-bar { height: var(--control-bar-height); background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0)); display: flex; align-items: center; padding: 0 20px; position: absolute; bottom: 0; left: 0; width: 100%; opacity: 0; transition: opacity 0.3s ease-in-out; z-index: 20; pointer-events: none; }
-        .player-content:hover .controls-bar, .player-content.controls-visible .controls-bar { opacity: 1; pointer-events: auto; }
+        .player-content { flex-grow: 1; height: 100%; display: flex; flex-direction: column; position: relative; background-color: #000; background-image: radial-gradient(ellipse at center, #1a1a1a 0%, #000000 70%); }
+        #videoPlayer { width: 100%; height: 100%; flex-grow: 1; background-color: transparent; display: block; object-fit: contain; }
+
+        .controls-bar {
+            height: var(--control-bar-height);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0; /* Oculto por defecto */
+            transition: opacity var(--controls-transition-speed) ease-in-out; /* Transición rápida */
+            z-index: 20;
+            pointer-events: none; /* No interactuable por defecto */
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Mostrar controles SOLO al hacer hover sobre el contenedor del video */
+        .player-content:hover .controls-bar {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* Ya no usamos :focus-within para mostrar la barra completa */
+        /* .player-content:focus-within .controls-bar { ... } */
+
+        /* Ocultar controles en pantalla completa */
+        .player-content:fullscreen .controls-bar,
+        .player-content:-webkit-full-screen .controls-bar {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         .controls-bar button { background: none; border: none; color: var(--control-icon-color); cursor: pointer; margin: 0 10px; padding: 10px; line-height: 1; transition: transform 0.1s ease-out, color 0.1s ease-out; display: inline-flex; align-items: center; justify-content: center; }
         .controls-bar button svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
         .controls-bar button:hover { color: var(--highlight-color); transform: scale(1.1); }
@@ -121,14 +119,17 @@
         #volumeSlider:disabled { opacity: 0.5; cursor: not-allowed; }
         .channel-info { position: absolute; top: 20px; left: 20px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px 15px; border-radius: var(--border-radius); font-size: 1.1em; z-index: 5; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .channel-info.visible { opacity: 1; }
-        .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--tertiary-bg); border-top: 6px solid var(--highlight-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; z-index: 1; display: none; }
+        .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 4px solid var(--tertiary-bg); border-top: 4px solid var(--highlight-color); border-radius: 50%; width: 45px; height: 45px; animation: spin 0.8s linear infinite; z-index: 1; display: none; }
         @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* --- DEBUG Estilos de Foco REMOVIDOS --- */
+
     </style>
 </head>
 <body>
     <div class="player-container">
         <div id="sidebar">
-            <div class="sidebar-header">
+             <div class="sidebar-header">
                 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjtH1eFwNcBk9FvfM8ozeG6zjDtvJR2j2CdfNtfn8rj0JP9PRWR7zeL_ayD_dwmmuqOe8-sTp-TcOGCVsg5yhUNBO_PqRVI9gCMu3B1x2MQ1ZsitAg-1NKxQ70x3H-O9eehSCsQO6DzLPxcB_uZpfGmfziYNcXQ0JylvrGY1PE-sc9nJ76l2c62PG3Kcvs/w457-h136/JORGEDEZ-19-3-2025.png"
                      alt="Logo Jorgedez" class="app-logo"
                      onerror="this.style.display='none'">
@@ -141,7 +142,7 @@
         <div id="playerContent" class="player-content">
             <div id="channelInfo" class="channel-info"></div>
             <div id="loader" class="loader"></div>
-            <video id="videoPlayer" controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture playsinline tabindex="0"></video>
+            <video id="videoPlayer" controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture playsinline tabindex="-1"></video>
             <div class="controls-bar">
                 <button id="playPauseButton" title="Reproducir/Pausar">
                     <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -180,7 +181,7 @@
             const closeButton = document.getElementById('closeButton');
             const playerContent = document.getElementById('playerContent');
             const controlsBar = document.querySelector('.controls-bar');
-            const channelCountElement = document.getElementById('channelCount'); // Referencia al contador
+            const channelCountElement = document.getElementById('channelCount');
 
             const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
 
@@ -189,7 +190,7 @@
             let currentChannelIndex = -1;
             let hls = null;
             let channelInfoTimeout;
-            let controlsTimeout;
+            // let controlsTimeout; // Removido
             let isSidebarFocused = false;
             let autoHideSidebarTimeoutId = null;
 
@@ -202,20 +203,14 @@
             } else { console.log("HLS.js no soportado."); }
 
             // --- Carga y Parseo M3U ---
-            async function fetchAndParseM3U(url) {
+            async function fetchAndParseM3U(url) { /* ... (sin cambios) ... */
                 showLoader(true);
                 try {
                     const response = await fetch(`${url}?t=${Date.now()}`);
                     if (!response.ok) throw new Error(`Error M3U (${response.status})`);
                     const m3uText = await response.text();
                     channels = parseM3U(m3uText);
-
-                    // --- Actualizar contador de canales ---
-                    if (channelCountElement) {
-                        channelCountElement.textContent = channels.length;
-                    }
-                    // --------------------------------------
-
+                    if (channelCountElement) { channelCountElement.textContent = channels.length; }
                     renderChannelList();
                     if (channels.length > 0) {
                         currentChannelIndex = 0;
@@ -230,7 +225,7 @@
                     console.error("Error al cargar M3U:", error);
                     channelListElement.innerHTML = `<li style="padding: 15px; color: #ff8a80;">Error: ${error.message}</li>`;
                     showChannelInfo("Error al cargar canales");
-                    if (channelCountElement) channelCountElement.textContent = 'X'; // Indicar error
+                    if (channelCountElement) channelCountElement.textContent = 'X';
                 } finally {
                     showLoader(false);
                 }
@@ -396,7 +391,7 @@
 
             function startAutoHideTimer() { /* ... (sin cambios) ... */
                 clearAutoHideTimer();
-                console.log("AutoHide: Timer set (4000ms).");
+                console.log("AutoHide: Timer set (2000ms).");
                 autoHideSidebarTimeoutId = setTimeout(() => {
                     console.log("AutoHide: Timeout fired.");
                     if (!sidebar.classList.contains('hidden')) {
@@ -406,7 +401,7 @@
                          console.log("AutoHide: Condition not met (already hidden). Doing nothing.");
                     }
                     autoHideSidebarTimeoutId = null;
-                }, 4000);
+                }, 2000); // 2 segundos
             }
 
             function toggleSidebar() { /* ... (sin cambios) ... */
@@ -416,8 +411,8 @@
             function hideSidebar() { /* ... (sin cambios) ... */
                 if (!sidebar.classList.contains('hidden')) {
                     sidebar.classList.add('hidden');
-                    video.focus();
-                    console.log("Sidebar oculta, foco en video");
+                    // No enfocar video explícitamente
+                    console.log("Sidebar oculta");
                 }
             }
             function showSidebar() { /* ... (sin cambios) ... */
@@ -533,28 +528,28 @@
             function adjustVolume(delta) { /* ... (sin cambios) ... */
                  let newVolume = Math.max(0, Math.min(1, video.volume + delta));
                  video.volume = newVolume; volumeSlider.value = newVolume;
-                 handleVolumeChange(); showControlsTemporarily();
+                 handleVolumeChange();
              }
             function toggleFullScreen() { /* ... (sin cambios) ... */
-                 if (!document.fullscreenElement) { playerContent.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`)); }
-                 else { document.exitFullscreen(); }
+                 if (!document.fullscreenElement) {
+                     playerContent.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
+                 } else {
+                     if (document.exitFullscreen) { document.exitFullscreen(); }
+                     else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+                     else if (document.msExitFullscreen) { document.msExitFullscreen(); }
+                 }
              }
 
-            // --- Visibilidad de Controles ---
-             function showControlsTemporarily() { /* ... (sin cambios) ... */
-                 playerContent.classList.add('controls-visible');
-                 clearTimeout(controlsTimeout);
-                 controlsTimeout = setTimeout(() => {
-                    if (!video.paused && !playerContent.contains(document.activeElement)) {
-                         playerContent.classList.remove('controls-visible');
-                    }
-                 }, 3500);
-             }
-             playerContent.addEventListener('mousemove', showControlsTemporarily);
-             playerContent.addEventListener('touchstart', showControlsTemporarily);
-             playerContent.addEventListener('focusin', showControlsTemporarily);
-             video.addEventListener('play', showControlsTemporarily);
-             video.addEventListener('pause', () => { clearTimeout(controlsTimeout); playerContent.classList.add('controls-visible'); });
+            // --- Visibilidad de Controles (REMOVIDA LÓGICA DE TIMEOUT Y CLASES JS) ---
+
+            // Listener para fullscreen
+             document.addEventListener('fullscreenchange', () => {
+                 console.log("Fullscreen cambió. Estado:", document.fullscreenElement ? "ON" : "OFF");
+             });
+              document.addEventListener('webkitfullscreenchange', () => {
+                 console.log("Webkit Fullscreen cambió. Estado:", document.webkitFullscreenElement ? "ON" : "OFF");
+             });
+
 
             // --- Inicialización ---
             fetchAndParseM3U(m3uUrl);
