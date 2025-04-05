@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Smart TV M3U v12</title> <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Reproductor Smart TV M3U v13</title> <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
             --primary-bg: #121212;
@@ -12,13 +12,13 @@
             --text-color: #e0e0e0;
             --text-secondary-color: #b3b3b3;
             --highlight-color: #1DB954;
-            --control-icon-color: #ffffff;
+            /* --control-icon-color: #ffffff; */ /* Ya no se usa */
             --sidebar-width: 300px;
-            --control-bar-height: 65px;
+            /* --control-bar-height: 65px; */ /* Ya no se usa */
             --border-radius: 4px;
             --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             --transition-speed: 0.3s;
-            --controls-transition-speed: 0.2s;
+            /* --controls-transition-speed: 0.2s; */ /* Ya no se usa */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -71,58 +71,24 @@
         .channel-item.selected:hover { background-color: #1aa34a; }
 
         .player-content { flex-grow: 1; height: 100%; display: flex; flex-direction: column; position: relative; background-color: #000; background-image: radial-gradient(ellipse at center, #1a1a1a 0%, #000000 70%); }
-        #videoPlayer { width: 100%; height: 100%; flex-grow: 1; background-color: transparent; display: block; object-fit: contain; }
+        /* Añadir outline: none para quitar posible borde azul al enfocar */
+        #videoPlayer { width: 100%; height: 100%; flex-grow: 1; background-color: transparent; display: block; object-fit: contain; outline: none; }
 
-        .controls-bar {
-            height: var(--control-bar-height);
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            opacity: 0; /* Oculto por defecto */
-            transition: opacity var(--controls-transition-speed) ease-in-out; /* Transición rápida */
-            z-index: 20;
-            pointer-events: none; /* No interactuable por defecto */
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        /* Mostrar controles SOLO al hacer hover sobre el contenedor del video */
-        .player-content:hover .controls-bar {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        /* Ya no usamos :focus-within para mostrar la barra completa */
-        /* .player-content:focus-within .controls-bar { ... } */
+        /* --- ESTILOS DE CONTROLES ELIMINADOS --- */
+        /* .controls-bar { ... } */
+        /* .player-content:hover .controls-bar, ... { ... } */
+        /* .player-content:fullscreen .controls-bar, ... { ... } */
+        /* .controls-bar button { ... } */
+        /* #playPauseButton ... */
+        /* #muteButton ... */
+        /* .volume-control ... */
+        /* #volumeSlider ... */
+        /* ---------------------------------------- */
 
-        /* Ocultar controles en pantalla completa */
-        .player-content:fullscreen .controls-bar,
-        .player-content:-webkit-full-screen .controls-bar {
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-
-        .controls-bar button { background: none; border: none; color: var(--control-icon-color); cursor: pointer; margin: 0 10px; padding: 10px; line-height: 1; transition: transform 0.1s ease-out, color 0.1s ease-out; display: inline-flex; align-items: center; justify-content: center; }
-        .controls-bar button svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .controls-bar button:hover { color: var(--highlight-color); transform: scale(1.1); }
-        #playPauseButton .icon-pause, #playPauseButton.playing .icon-play { display: none; }
-        #playPauseButton.playing .icon-pause { display: inline-block; }
-        #muteButton .icon-volume-x, #muteButton:not(.muted) .icon-volume-2 { display: none; }
-        #muteButton.muted .icon-volume-x { display: inline-block; }
-        #muteButton:not(.muted) .icon-volume-2 { display: inline-block;}
-        .volume-control { display: flex; align-items: center; margin-left: 5px; }
-        #volumeSlider { cursor: pointer; width: 100px; margin-left: 8px; height: 5px; appearance: none; background: rgba(255, 255, 255, 0.3); border-radius: 3px; outline: none; transition: opacity 0.2s ease; }
-        #volumeSlider::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; background: var(--control-icon-color); border-radius: 50%; cursor: pointer; }
-        #volumeSlider::-moz-range-thumb { width: 14px; height: 14px; background: var(--control-icon-color); border-radius: 50%; cursor: pointer; border: none; }
-        #volumeSlider:disabled { opacity: 0.5; cursor: not-allowed; }
         .channel-info { position: absolute; top: 20px; left: 20px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px 15px; border-radius: var(--border-radius); font-size: 1.1em; z-index: 5; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .channel-info.visible { opacity: 1; }
         .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 4px solid var(--tertiary-bg); border-top: 4px solid var(--highlight-color); border-radius: 50%; width: 45px; height: 45px; animation: spin 0.8s linear infinite; z-index: 1; display: none; }
         @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-
-        /* --- DEBUG Estilos de Foco REMOVIDOS --- */
 
     </style>
 </head>
@@ -139,31 +105,10 @@
                 <ul id="channelList" class="channel-list" tabindex="-1"></ul>
             </div>
         </div>
-        <div id="playerContent" class="player-content">
-            <div id="channelInfo" class="channel-info"></div>
+        <div id="playerContent" class="player-content"> <div id="channelInfo" class="channel-info"></div>
             <div id="loader" class="loader"></div>
-            <video id="videoPlayer" controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture playsinline tabindex="-1"></video>
-            <div class="controls-bar">
-                <button id="playPauseButton" title="Reproducir/Pausar">
-                    <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    <svg class="icon-pause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                </button>
-                <button id="muteButton" title="Silenciar/Activar Sonido">
-                    <svg class="icon-volume-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                    <svg class="icon-volume-x" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-                </button>
-                <div class="volume-control">
-                     <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" title="Volumen">
-                </div>
-                 <button id="castButton" title="Enviar a Chromecast (requiere configuración)">
-                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-8"></path><path d="M2 12a9 9 0 0 1 9 9"></path><path d="M2 17a4 4 0 0 1 4 4"></path><line x1="2" y1="22" x2="2.01" y2="22"></line></svg>
-                 </button>
-                 <div style="flex-grow: 1;"></div>
-                 <button id="closeButton" title="Cerrar">
-                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                 </button>
+            <video id="videoPlayer" controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture playsinline></video>
             </div>
-        </div>
     </div>
 
     <script>
@@ -174,14 +119,16 @@
             const channelListElement = document.getElementById('channelList');
             const channelInfoElement = document.getElementById('channelInfo');
             const loaderElement = document.getElementById('loader');
-            const playPauseButton = document.getElementById('playPauseButton');
-            const muteButton = document.getElementById('muteButton');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const castButton = document.getElementById('castButton');
-            const closeButton = document.getElementById('closeButton');
             const playerContent = document.getElementById('playerContent');
-            const controlsBar = document.querySelector('.controls-bar');
             const channelCountElement = document.getElementById('channelCount');
+            // Referencias a botones eliminadas
+            // const playPauseButton = ...
+            // const muteButton = ...
+            // const volumeSlider = ...
+            // const castButton = ...
+            // const closeButton = ...
+            // const controlsBar = ...
+
 
             const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
 
@@ -190,7 +137,6 @@
             let currentChannelIndex = -1;
             let hls = null;
             let channelInfoTimeout;
-            // let controlsTimeout; // Removido
             let isSidebarFocused = false;
             let autoHideSidebarTimeoutId = null;
 
@@ -343,7 +289,7 @@
                 console.log("AutoHide: Evento 'playing' recibido.");
                 showLoader(false);
                 video.style.opacity = 1;
-                updatePlayPauseButton();
+                // updatePlayPauseButton(); // Removido
                 startAutoHideTimer();
              }
 
@@ -351,7 +297,8 @@
                  console.error("Error en video.play():", e);
                  showLoader(false); video.style.opacity = 1;
                  showChannelInfo(`Error al iniciar: ${e.name}`);
-                 updatePlayPauseButton(); clearAutoHideTimer();
+                 // updatePlayPauseButton(); // Removido
+                 clearAutoHideTimer();
              }
              function handleError(channel, errorData) { /* ... (sin cambios) ... */
                  const channelName = channel ? channel.name : 'desconocido';
@@ -361,7 +308,9 @@
                  if (errorData?.type === Hls.ErrorTypes.NETWORK_ERROR) { errorMsg += ` (Error red ${errorData.details})`; }
                  else if (errorData?.type === Hls.ErrorTypes.MEDIA_ERROR) { errorMsg += ` (Error medio ${errorData.details})`; }
                  else if (errorData?.details) { errorMsg += ` (${errorData.details})`; }
-                 showChannelInfo(errorMsg); updatePlayPauseButton(); clearAutoHideTimer();
+                 showChannelInfo(errorMsg);
+                 // updatePlayPauseButton(); // Removido
+                 clearAutoHideTimer();
                  if (hls && errorData?.fatal) {
                      console.warn(`Error HLS fatal: ${errorData.type}`);
                      switch(errorData.type) {
@@ -411,7 +360,6 @@
             function hideSidebar() { /* ... (sin cambios) ... */
                 if (!sidebar.classList.contains('hidden')) {
                     sidebar.classList.add('hidden');
-                    // No enfocar video explícitamente
                     console.log("Sidebar oculta");
                 }
             }
@@ -446,77 +394,92 @@
                 channelInfoTimeout = setTimeout(() => { channelInfoElement.classList.remove('visible'); }, 4500);
             }
 
-             // --- Controles de Video ---
-             playPauseButton.addEventListener('click', togglePlayPause);
-             muteButton.addEventListener('click', toggleMute);
-             volumeSlider.addEventListener('input', handleVolumeChange);
-             closeButton.addEventListener('click', () => { if (confirm("¿Cerrar reproductor?")) { window.history.back(); } });
-             video.addEventListener('pause', () => { updatePlayPauseButton(); clearAutoHideTimer(); });
-             video.addEventListener('ended', () => { updatePlayPauseButton(); clearAutoHideTimer(); });
+             // --- Controles de Video (Funciones eliminadas) ---
+             // function togglePlayPause() { ... }
+             // function updatePlayPauseButton() { ... }
+             // function toggleMute() { ... }
+             // function handleVolumeChange() { ... }
+             // function adjustVolume() { ... }
 
-             function togglePlayPause() { /* ... (sin cambios) ... */
-                 console.log("togglePlayPause. Paused:", video.paused);
-                 if (!video.src && !hls?.url && channels.length > 0) { console.log("Nada cargado, play canal actual:", currentChannelIndex); selectAndPlayChannel(currentChannelIndex); }
-                 else if (video.paused) { console.log("Video pausado, play..."); video.play().catch(handlePlayError); }
-                 else { console.log("Video reproduciendo, pause..."); video.pause(); }
-             }
-             function updatePlayPauseButton() { /* ... (sin cambios) ... */
-                 const isPlaying = !video.paused;
-                 playPauseButton.classList.toggle('playing', isPlaying);
-             }
-             function toggleMute() { /* ... (sin cambios) ... */
-                 video.muted = !video.muted;
-                 muteButton.classList.toggle('muted', video.muted);
-                 volumeSlider.disabled = video.muted;
-             }
-             function handleVolumeChange() { /* ... (sin cambios) ... */
-                 video.volume = volumeSlider.value;
-                 if (video.volume > 0 && video.muted) { video.muted = false; muteButton.classList.remove('muted'); volumeSlider.disabled = false; }
-                 else if (video.volume === 0 && !video.muted) { video.muted = true; muteButton.classList.add('muted'); volumeSlider.disabled = true; }
-             }
-             volumeSlider.value = video.volume; muteButton.classList.toggle('muted', video.muted); volumeSlider.disabled = video.muted; updatePlayPauseButton();
+             // Event listeners para botones eliminados
+             // playPauseButton.addEventListener(...)
+             // muteButton.addEventListener(...)
+             // volumeSlider.addEventListener(...)
+             // closeButton.addEventListener(...)
 
-             // --- Chromecast Placeholder ---
-             castButton.addEventListener('click', () => alert('Funcionalidad Chromecast no implementada.'));
+             // Event listeners de video solo para auto-hide
+             video.addEventListener('pause', clearAutoHideTimer);
+             video.addEventListener('ended', clearAutoHideTimer);
 
-            // --- Manejo de Teclado / Control Remoto ---
-            document.addEventListener('keydown', (event) => { /* ... (sin cambios) ... */
+             // --- Chromecast Placeholder (Función eliminada) ---
+             // castButton.addEventListener(...)
+
+            // --- Manejo de Teclado / Control Remoto (Actualizado) ---
+            document.addEventListener('keydown', (event) => {
                  if (['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) return;
                  if (event.target.tagName === 'INPUT') return;
 
+                 // 1. Mostrar Sidebar si está oculta (cualquier tecla excepto toggles)
                  if (sidebar.classList.contains('hidden')) {
                      if (event.key !== 'Backspace' && event.key !== 'Escape' && event.key !== 'b' && event.key !== 'B') {
                          console.log("Keydown: Sidebar oculta, mostrando...");
                          event.preventDefault(); showSidebar(); return;
                      }
                  }
+                 // 2. Toggle Sidebar (teclas específicas)
                  if (event.key === 'Backspace' || event.key === 'Escape' || event.key === 'b' || event.key === 'B') {
                      console.log("Keydown: Toggle sidebar...");
                      event.preventDefault(); toggleSidebar(); return;
                  }
+                 // 3. Navegación/Selección en Sidebar (si visible y enfocada)
                  isSidebarFocused = sidebar.contains(document.activeElement);
                  if (!sidebar.classList.contains('hidden') && isSidebarFocused) {
                      switch (event.key) {
                          case 'ArrowUp': event.preventDefault(); navigateList(-1); break;
                          case 'ArrowDown': event.preventDefault(); navigateList(1); break;
-                         case 'Enter': case ' ':
+                         case 'Enter': case ' ': // OK/Select
                              event.preventDefault();
                              const focused = document.activeElement;
                              if (focused?.classList.contains('channel-item')) { selectAndPlayChannel(parseInt(focused.dataset.index, 10)); }
                              break;
-                         default: break;
+                         default: break; // Ignorar otras teclas en la lista
                      }
                  }
+                 // 4. Control de Video (si sidebar oculta o no enfocada)
                  else if (sidebar.classList.contains('hidden') || !isSidebarFocused) {
                      switch(event.key) {
-                         case ' ': event.preventDefault(); togglePlayPause(); break;
-                         case 'm': case 'M': event.preventDefault(); toggleMute(); break;
-                         case 'ArrowLeft': event.preventDefault(); /* Seek? */ break;
-                         case 'ArrowRight': event.preventDefault(); /* Seek? */ break;
-                         case 'ArrowUp': event.preventDefault(); adjustVolume(0.1); break;
-                         case 'ArrowDown': event.preventDefault(); adjustVolume(-0.1); break;
-                         case 'f': case 'F': event.preventDefault(); toggleFullScreen(); break;
-                         default: break;
+                         case ' ': // Play/Pause directo en video
+                             event.preventDefault();
+                             if (video.src || hls?.url) { // Solo si hay algo cargado
+                                if (video.paused) video.play().catch(handlePlayError);
+                                else video.pause();
+                              }
+                             break;
+                         case 'm': case 'M': // Mute directo en video
+                             event.preventDefault();
+                             video.muted = !video.muted;
+                             console.log("Mute toggled via key:", video.muted);
+                             break;
+                         // Mantener control de volumen con flechas
+                         case 'ArrowUp':
+                             event.preventDefault();
+                             let volUp = Math.min(1, video.volume + 0.1);
+                             video.volume = volUp;
+                             if(video.muted && volUp > 0) video.muted = false; // Quitar mute si sube volumen
+                             console.log("Volume Up key:", video.volume);
+                             break;
+                         case 'ArrowDown':
+                             event.preventDefault();
+                             let volDown = Math.max(0, video.volume - 0.1);
+                             video.volume = volDown;
+                             if(volDown === 0 && !video.muted) video.muted = true; // Poner mute si baja a 0
+                             console.log("Volume Down key:", video.volume);
+                             break;
+                         case 'f': case 'F': // Fullscreen
+                             event.preventDefault();
+                             toggleFullScreen();
+                             break;
+                         default: break; // Ignorar otras teclas
                      }
                  }
             });
@@ -525,11 +488,8 @@
                  let newIndex = Math.max(0, Math.min(currentChannelIndex + direction, channels.length - 1));
                  if (newIndex !== currentChannelIndex) { currentChannelIndex = newIndex; focusChannel(currentChannelIndex); }
              }
-            function adjustVolume(delta) { /* ... (sin cambios) ... */
-                 let newVolume = Math.max(0, Math.min(1, video.volume + delta));
-                 video.volume = newVolume; volumeSlider.value = newVolume;
-                 handleVolumeChange();
-             }
+            // Función adjustVolume eliminada (se hace directo en keydown)
+
             function toggleFullScreen() { /* ... (sin cambios) ... */
                  if (!document.fullscreenElement) {
                      playerContent.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
@@ -540,7 +500,7 @@
                  }
              }
 
-            // --- Visibilidad de Controles (REMOVIDA LÓGICA DE TIMEOUT Y CLASES JS) ---
+            // --- Visibilidad de Controles (REMOVIDA COMPLETAMENTE) ---
 
             // Listener para fullscreen
              document.addEventListener('fullscreenchange', () => {
