@@ -3,65 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Smart TV M3U v14.7 (CSS Color)</title> <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Reproductor Smart TV M3U v14.7 (Sin Outline Amarillo)</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         /* --- CSS Variables --- */
         :root {
-            --primary-bg: #121212;
-            --secondary-bg: #1e1e1e;
-            --tertiary-bg: #2a2a2a;
-            --text-color: #e0e0e0;
-            --text-secondary-color: #b3b3b3; /* Color grisáceo por defecto para la estrella */
-            --highlight-color: #1DB954;
-            --favorite-color: #FFD700; /* Amarillo para favorito */
-            --sidebar-width: 240px;
-            --border-radius: 4px;
-            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            --transition-speed: 0.4s;
-            --timing-function: cubic-bezier(0.645, 0.045, 0.355, 1.000);
+            --primary-bg: #121212; /* Dark background for the main app */
+            --secondary-bg: #1e1e1e; /* Slightly lighter background for sidebar */
+            --tertiary-bg: #2a2a2a; /* Background for interactive elements and borders */
+            --text-color: #e0e0e0; /* Primary text color */
+            --text-secondary-color: #b3b3b3; /* Secondary text color (e.g., non-selected items, default star) */
+            --highlight-color: #1DB954; /* Accent color for selected items (Spotify green) */
+            --favorite-color: #FFD700; /* Color for favorite items (Gold) */
+            --sidebar-width: 240px; /* Default width of the sidebar */
+            --border-radius: 4px; /* Standard border radius for elements */
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* System font stack */
+            --transition-speed: 0.4s; /* Speed for animations */
+            --timing-function: cubic-bezier(0.645, 0.045, 0.355, 1.000); /* Smooth easing for transitions */
         }
 
         /* --- Reset and Globals --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; overflow: hidden; background-color: var(--primary-bg); color: var(--text-color); font-family: var(--font-family); }
-        .player-container { display: flex; height: 100%; width: 100%; position: relative; overflow: hidden; }
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling on the body */
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: var(--font-family);
+        }
+        .player-container {
+            display: flex; /* Use flexbox for layout */
+            height: 100%;
+            width: 100%;
+            position: relative; /* Needed for absolute positioning of children */
+            overflow: hidden; /* Hide anything that overflows */
+        }
 
         /* --- Sidebar --- */
         #sidebar {
             width: var(--sidebar-width);
-            min-width: var(--sidebar-width);
+            min-width: var(--sidebar-width); /* Prevent shrinking below the defined width */
             background-color: var(--secondary-bg);
             height: 100%;
-            overflow: hidden;
+            overflow: hidden; /* Initially hide overflow */
             transition: transform var(--transition-speed) var(--timing-function),
                         width var(--transition-speed) var(--timing-function),
                         min-width var(--transition-speed) var(--timing-function),
                         padding var(--transition-speed) var(--timing-function),
-                        border var(--transition-speed) var(--timing-function);
-            z-index: 10;
-            border-right: 1px solid var(--tertiary-bg);
+                        border var(--transition-speed) var(--timing-function); /* Smooth transitions for hiding/showing */
+            z-index: 10; /* Keep sidebar above player content */
+            border-right: 1px solid var(--tertiary-bg); /* Separator line */
             display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
+            flex-direction: column; /* Stack header and list vertically */
+            flex-shrink: 0; /* Prevent sidebar from shrinking when content grows */
         }
+        /* Styles for when the sidebar is hidden */
         #sidebar.hidden {
-            transform: translateX(-100%); width: 0; min-width: 0; padding: 0; border: none; overflow: hidden;
+            transform: translateX(-100%); /* Slide out to the left */
+            width: 0;
+            min-width: 0;
+            padding: 0;
+            border: none;
+            overflow: hidden; /* Ensure content is clipped */
         }
 
         /* --- Sidebar Header --- */
         .sidebar-header {
-            padding: 10px 15px; border-bottom: 1px solid var(--tertiary-bg);
-            transition: padding var(--transition-speed) var(--timing-function), border var(--transition-speed) var(--timing-function), height var(--transition-speed) var(--timing-function), opacity var(--transition-speed) var(--timing-function);
-            display: flex; align-items: center; justify-content: center; gap: 10px; height: 70px; opacity: 1; flex-shrink: 0;
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--tertiary-bg);
+            transition: padding var(--transition-speed) var(--timing-function),
+                        border var(--transition-speed) var(--timing-function),
+                        height var(--transition-speed) var(--timing-function),
+                        opacity var(--transition-speed) var(--timing-function); /* Animate header properties */
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center logo and count */
+            gap: 10px; /* Space between logo and count */
+            height: 70px; /* Fixed height */
+            opacity: 1;
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
-        #sidebar.hidden .sidebar-header { padding: 0; border: none; height: 0; opacity: 0; overflow: hidden; }
-        .app-logo { max-width: 70%; max-height: 40px; object-fit: contain; display: block; }
-        .channel-count { background-color: var(--tertiary-bg); color: var(--text-color); font-size: 0.75em; font-weight: bold; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; transition: opacity var(--transition-speed) var(--timing-function); }
-        #sidebar.hidden .channel-count { opacity: 0; }
+        /* Styles for the header when the sidebar is hidden */
+        #sidebar.hidden .sidebar-header {
+            padding: 0;
+            border: none;
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .app-logo {
+            max-width: 70%;
+            max-height: 40px;
+            object-fit: contain; /* Scale logo while preserving aspect ratio */
+            display: block; /* Remove extra space below image */
+        }
+        .channel-count {
+            background-color: var(--tertiary-bg);
+            color: var(--text-color);
+            font-size: 0.75em;
+            font-weight: bold;
+            border-radius: 50%; /* Make it circular */
+            width: 28px;
+            height: 28px;
+            display: inline-flex; /* Use flex to center content */
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Ensure text is vertically centered */
+            flex-shrink: 0; /* Prevent shrinking */
+            transition: opacity var(--transition-speed) var(--timing-function);
+        }
+        /* Hide channel count when sidebar is hidden */
+        #sidebar.hidden .channel-count {
+            opacity: 0;
+        }
 
         /* --- Channel List --- */
-        .channel-list-container { flex-grow: 1; overflow-y: auto; transition: opacity var(--transition-speed) var(--timing-function); }
-        #sidebar.hidden .channel-list-container { opacity: 0; }
+        .channel-list-container {
+            flex-grow: 1; /* Allow container to fill remaining space */
+            overflow-y: auto; /* Enable vertical scrolling */
+            transition: opacity var(--transition-speed) var(--timing-function);
+        }
+        /* Hide list container when sidebar is hidden */
+        #sidebar.hidden .channel-list-container {
+            opacity: 0;
+        }
 
         /* --- Custom Scrollbar --- */
         .channel-list-container::-webkit-scrollbar { width: 10px; }
@@ -72,70 +137,176 @@
 
         /* --- Channel Item --- */
         .channel-item {
-            display: flex; align-items: center;
+            display: flex;
+            align-items: center;
             padding: 10px 15px;
             cursor: pointer;
             border-bottom: 1px solid var(--tertiary-bg);
-            transition: background-color 0.15s ease-out, color 0.15s ease-out;
+            transition: background-color 0.15s ease-out, color 0.15s ease-out; /* Quick hover effect */
             font-size: 0.95em;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            color: var(--text-secondary-color);
-            position: relative;
+            white-space: nowrap; /* Prevent text wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Show ellipsis (...) for overflow */
+            color: var(--text-secondary-color); /* Default text color */
+            position: relative; /* For absolute positioning of favorite button */
         }
-        .channel-item:last-child { border-bottom: none; }
-        .channel-logo { width: 32px; height: 32px; margin-right: 12px; object-fit: contain; flex-shrink: 0; background-color: rgba(255, 255, 255, 0.1); border-radius: var(--border-radius); vertical-align: middle; }
-        .channel-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; margin-right: 30px; }
-        .channel-item:hover, .channel-item:focus { background-color: var(--tertiary-bg); color: var(--text-color); outline: none; }
-        .channel-item.selected { background-color: var(--highlight-color); font-weight: bold; color: var(--primary-bg); }
-        .channel-item.selected .channel-name { color: var(--primary-bg); }
-        .channel-item.selected:hover { background-color: #1aa34a; }
+        .channel-item:last-child { border-bottom: none; } /* Remove border from last item */
+        .channel-logo {
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+            object-fit: contain; /* Scale logo nicely */
+            flex-shrink: 0; /* Prevent logo from shrinking */
+            background-color: rgba(255, 255, 255, 0.1); /* Subtle background for logos */
+            border-radius: var(--border-radius);
+            vertical-align: middle; /* Align nicely with text */
+        }
+        .channel-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex-grow: 1; /* Allow name to take available space */
+            margin-right: 30px; /* Space before favorite button */
+        }
+        /* Hover/Focus styles */
+        .channel-item:hover, .channel-item:focus {
+            background-color: var(--tertiary-bg);
+            color: var(--text-color); /* Highlight text on hover/focus */
+            outline: none; /* Remove default focus outline */
+        }
+        /* Selected channel styles */
+        .channel-item.selected {
+            background-color: var(--highlight-color);
+            font-weight: bold;
+            color: var(--primary-bg); /* Dark text on light background */
+        }
+        .channel-item.selected .channel-name {
+             color: var(--primary-bg); /* Ensure name color matches */
+        }
+        /* Slightly darker highlight on hover when selected */
+        .channel-item.selected:hover {
+            background-color: #1aa34a;
+        }
 
         /* --- Favorite Button --- */
         .favorite-btn {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; cursor: pointer; padding: 5px;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0.6; transition: opacity 0.2s ease;
+            position: absolute;
+            right: 10px; /* Position on the right */
+            top: 50%;
+            transform: translateY(-50%); /* Center vertically */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6; /* Slightly transparent by default */
+            transition: opacity 0.2s ease;
         }
         .favorite-btn svg {
-            width: 18px; height: 18px;
-            /* No fill aquí, se define abajo para el path */
+            width: 18px;
+            height: 18px;
+            /* Fill color is handled by the path */
         }
-        /* --- MODIFICACIÓN: Definir fill directamente en el path --- */
+        /* --- MODIFICATION: Define fill directly on the path --- */
         .favorite-btn svg path {
-            fill: var(--text-secondary-color); /* Color base grisáceo por defecto */
-            transition: fill 0.2s ease; /* Podemos reintroducir la transición aquí si queremos */
+            fill: var(--text-secondary-color); /* Default star color (greyish) */
+            transition: fill 0.2s ease; /* Smooth color change */
         }
+        /* Show favorite button more clearly on hover/focus or if it's already a favorite */
         .channel-item:hover .favorite-btn,
         .channel-item:focus .favorite-btn,
-        .channel-item .favorite-btn.is-favorite { opacity: 1; }
-
-        /* CSS se encarga del estado final después del re-render */
-        .favorite-btn.is-favorite svg path { /* Apuntar al path */
-            fill: var(--favorite-color); /* Amarillo */
+        .channel-item .favorite-btn.is-favorite {
+            opacity: 1;
         }
-        .channel-item.selected .favorite-btn svg path { /* Apuntar al path */
-            fill: var(--primary-bg); /* Oscuro sobre fondo claro */
+
+        /* Style for the favorite state (applied by JS via class) */
+        .favorite-btn.is-favorite svg path { /* Target the path */
+            fill: var(--favorite-color); /* Yellow color */
+        }
+        /* Style favorite button when the channel item is selected */
+        .channel-item.selected .favorite-btn svg path { /* Target the path */
+            fill: var(--primary-bg); /* Dark color to contrast with highlight */
             opacity: 0.8;
         }
-        /* Asegurar amarillo si está seleccionado Y es favorito */
-        .channel-item.selected .favorite-btn.is-favorite svg path { /* Apuntar al path */
-            fill: var(--favorite-color); /* Amarillo prevalece */
+        /* Ensure favorite color (yellow) overrides selected style if channel is both selected AND favorite */
+        .channel-item.selected .favorite-btn.is-favorite svg path { /* Target the path */
+            fill: var(--favorite-color); /* Yellow takes precedence */
             opacity: 1;
         }
 
         /* --- Main Content (Player) --- */
         .player-content {
-            flex-grow: 1; height: 100%; display: flex; flex-direction: column; position: relative; background-color: #000;
-            background-image: repeating-linear-gradient( 45deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 10px );
+            flex-grow: 1; /* Take remaining horizontal space */
+            height: 100%;
+            display: flex;
+            flex-direction: column; /* Stack info/loader and video */
+            position: relative; /* For positioning info/loader */
+            background-color: #000; /* Black background for video area */
+            /* Subtle background pattern */
+            background-image: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.02),
+                rgba(255, 255, 255, 0.02) 1px,
+                transparent 1px,
+                transparent 10px
+            );
+            /* *** NUEVO: Evitar el borde de enfoque amarillo en TVs *** */
+            outline: none !important;
+            border: none; /* Asegurar que no haya borde tampoco */
         }
-        #videoPlayer { width: 100%; height: 100%; flex-grow: 1; background-color: transparent; display: block; object-fit: contain; outline: none; }
+        #videoPlayer {
+            width: 100%;
+            height: 100%;
+            flex-grow: 1; /* Video takes available space */
+            background-color: transparent; /* Let player-content background show */
+            display: block; /* Remove extra space below video */
+            object-fit: contain; /* Fit video within bounds, preserving aspect ratio */
+            outline: none; /* Remove focus outline specifically on video too */
+        }
 
         /* --- Channel Info & Loader --- */
-        .channel-info { position: absolute; top: 20px; left: 20px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px 15px; border-radius: var(--border-radius); font-size: 1.1em; z-index: 5; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .channel-info.visible { opacity: 1; }
-        .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 4px solid var(--tertiary-bg); border-top: 4px solid var(--highlight-color); border-radius: 50%; width: 45px; height: 45px; animation: spin 0.8s linear infinite; z-index: 1; display: none; }
-        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        .channel-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            color: white;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            font-size: 1.1em;
+            z-index: 5; /* Above video, below sidebar */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.5s ease; /* Fade in/out */
+            pointer-events: none; /* Don't block clicks on video */
+            max-width: 80%; /* Prevent overly long info text */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .channel-info.visible {
+            opacity: 1; /* Make visible */
+        }
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the loader */
+            border: 4px solid var(--tertiary-bg); /* Base circle */
+            border-top: 4px solid var(--highlight-color); /* Spinner color */
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            animation: spin 0.8s linear infinite; /* Rotation animation */
+            z-index: 1; /* Below channel info but above video */
+            display: none; /* Hidden by default */
+        }
+        /* Loader animation */
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
 
     </style>
 </head>
@@ -147,14 +318,15 @@
                  <span id="channelCount" class="channel-count">0</span>
              </div>
              <div class="channel-list-container">
-                 <ul id="channelList" class="channel-list" tabindex="-1"></ul>
+                 <ul id="channelList" class="channel-list" tabindex="-1">
+                     </ul>
              </div>
         </div>
 
-        <div id="playerContent" class="player-content">
-            <div id="channelInfo" class="channel-info"></div>
+        <div id="playerContent" class="player-content" tabindex="-1"> <div id="channelInfo" class="channel-info"></div>
             <div id="loader" class="loader"></div>
-            <video id="videoPlayer" controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture playsinline></video>
+            <video id="videoPlayer" controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture playsinline>
+                </video>
         </div>
     </div>
 
@@ -171,164 +343,283 @@
             const channelListContainer = document.querySelector('.channel-list-container');
 
             // --- M3U URL ---
+            // Replace this with the actual URL of your M3U playlist
             const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
 
-            // --- State ---
-            let channels = [];
-            let currentChannelIndex = -1;
-            let hls = null;
-            let channelInfoTimeout;
-            let isSidebarFocused = false;
-            let autoHideSidebarTimeoutId = null;
+            // --- State Variables ---
+            let channels = []; // Array to hold parsed channel objects
+            let currentChannelIndex = -1; // Logical index of the currently selected/playing channel
+            let hls = null; // HLS.js instance
+            let channelInfoTimeout; // Timeout ID for hiding the channel info message
+            let isSidebarFocused = false; // Flag to track if focus is within the sidebar list
+            let autoHideSidebarTimeoutId = null; // Timeout ID for auto-hiding the sidebar
 
             // --- Favorites ---
-            let favoriteChannels = new Set();
-            const FAVORITES_STORAGE_KEY = 'm3uPlayer_favorites_v2';
+            let favoriteChannels = new Set(); // Set to store URLs of favorite channels
+            const FAVORITES_STORAGE_KEY = 'm3uPlayer_favorites_v2'; // Key for LocalStorage
 
             // --- Last Channel ---
-            const LAST_CHANNEL_STORAGE_KEY = 'm3uPlayer_lastChannelIndex';
+            const LAST_CHANNEL_STORAGE_KEY = 'm3uPlayer_lastChannelIndex'; // Key for storing the last played channel index
 
             // --- Volume Persistence ---
-            const VOLUME_STORAGE_KEY = 'm3uPlayer_volume';
-            const MUTED_STORAGE_KEY = 'm3uPlayer_muted';
+            const VOLUME_STORAGE_KEY = 'm3uPlayer_volume'; // Key for storing volume
+            const MUTED_STORAGE_KEY = 'm3uPlayer_muted'; // Key for storing muted state
 
             // --- HLS Initialization ---
             if (Hls.isSupported()) {
                 console.log("HLS.js is supported.");
-                hls = new Hls({});
+                hls = new Hls({
+                    // Optional HLS.js configuration can go here
+                    // Example: enableWorker: true, lowLatencyMode: true
+                });
+                // Error handling for HLS streams
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     const currentChannelObject = channels.find(ch => ch.index === currentChannelIndex);
-                    handleError(currentChannelObject, data);
+                    handleError(currentChannelObject, data); // Pass channel info to error handler
                 });
-                hls.attachMedia(video);
-            } else { console.log("HLS.js is not supported."); }
+                hls.attachMedia(video); // Attach HLS.js to the video element
+            } else {
+                console.log("HLS.js is not supported. Native playback will be attempted for HLS streams.");
+            }
 
-            // --- LocalStorage Functions ---
-            function saveToLocalStorage(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error(`LS Save Error (${key}):`, e); } }
-            function loadFromLocalStorage(key, defaultValue = null) { try { const sv = localStorage.getItem(key); return sv !== null ? JSON.parse(sv) : defaultValue; } catch (e) { console.error(`LS Load Error (${key}):`, e); return defaultValue; } }
+            // --- LocalStorage Helper Functions ---
+            function saveToLocalStorage(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (e) {
+                    console.error(`LocalStorage Save Error (${key}):`, e);
+                }
+            }
+            function loadFromLocalStorage(key, defaultValue = null) {
+                try {
+                    const storedValue = localStorage.getItem(key);
+                    return storedValue !== null ? JSON.parse(storedValue) : defaultValue;
+                } catch (e) {
+                    console.error(`LocalStorage Load Error (${key}):`, e);
+                    return defaultValue; // Return default value on error
+                }
+            }
 
-            // --- Load Initial State ---
+            // --- Load Initial State from LocalStorage ---
             function loadInitialState() {
+                // Load favorites
                 const savedFavorites = loadFromLocalStorage(FAVORITES_STORAGE_KEY, []);
-                favoriteChannels = new Set(savedFavorites);
+                favoriteChannels = new Set(savedFavorites); // Initialize the Set with saved URLs
                 console.log(`Favorites loaded: ${favoriteChannels.size}`);
+
+                // Load last played channel index
                 const savedIndex = loadFromLocalStorage(LAST_CHANNEL_STORAGE_KEY, -1);
-                if (channels.some(ch => ch.index === savedIndex)) { currentChannelIndex = savedIndex; console.log(`Last channel loaded: ${currentChannelIndex}`); }
-                else { currentChannelIndex = channels.length > 0 ? channels[0].index : -1; console.log(`Fallback index: ${currentChannelIndex}`); }
-                const savedVolume = loadFromLocalStorage(VOLUME_STORAGE_KEY, 0.8);
-                const savedMuted = loadFromLocalStorage(MUTED_STORAGE_KEY, false);
-                video.volume = savedVolume; video.muted = savedMuted;
+                // Check if the saved index is still valid within the current channel list
+                if (channels.some(ch => ch.index === savedIndex)) {
+                    currentChannelIndex = savedIndex;
+                    console.log(`Last channel index loaded: ${currentChannelIndex}`);
+                } else {
+                    // Fallback to the first channel if saved index is invalid or not set
+                    currentChannelIndex = channels.length > 0 ? channels[0].index : -1;
+                    console.log(`No valid last channel found or list changed. Falling back to index: ${currentChannelIndex}`);
+                }
+
+                // Load volume and muted state
+                const savedVolume = loadFromLocalStorage(VOLUME_STORAGE_KEY, 0.8); // Default volume 80%
+                const savedMuted = loadFromLocalStorage(MUTED_STORAGE_KEY, false); // Default not muted
+                video.volume = savedVolume;
+                video.muted = savedMuted;
                 console.log(`Volume loaded: ${video.volume}, Muted: ${video.muted}`);
             }
 
-            // --- Fetch and Parse M3U ---
+            // --- Fetch and Parse M3U Playlist ---
             async function fetchAndParseM3U(url) {
-                showLoader(true);
+                showLoader(true); // Show loading indicator
                 try {
+                    // Append timestamp to URL to bypass cache if needed
                     const response = await fetch(`${url}?t=${Date.now()}`);
-                    if (!response.ok) throw new Error(`Fetch M3U failed (${response.status})`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch M3U list (Status: ${response.status})`);
+                    }
                     const m3uText = await response.text();
-                    channels = parseM3U(m3uText);
+                    channels = parseM3U(m3uText); // Parse the M3U text
                     console.log(`Channels parsed: ${channels.length}`);
-                    if (channelCountElement) channelCountElement.textContent = channels.length;
-                    loadInitialState();
-                    renderChannelList();
+
+                    // Update channel count display
+                    if (channelCountElement) {
+                        channelCountElement.textContent = channels.length;
+                    }
+
+                    loadInitialState(); // Load favorites, last channel, volume *after* channels are parsed
+                    renderChannelList(); // Render the list in the sidebar
+
                     if (channels.length > 0) {
+                        // Display info for the initially selected channel (could be last played or first)
                         const initialChannel = channels.find(ch => ch.index === currentChannelIndex);
-                        showChannelInfo(initialChannel?.name || "Select channel");
-                        requestAnimationFrame(() => focusChannel(currentChannelIndex, true));
+                        showChannelInfo(initialChannel?.name || "Select a channel");
+                        // Use requestAnimationFrame to ensure DOM is updated before focusing
+                        requestAnimationFrame(() => focusChannel(currentChannelIndex, true)); // Focus instantly
                     } else {
-                        channelListElement.innerHTML = `<li style="padding: 15px;">Empty list.</li>`;
+                        // Handle empty playlist
+                        channelListElement.innerHTML = `<li style="padding: 15px;">List is empty or failed to load.</li>`;
                         showChannelInfo("No channels found");
                     }
                 } catch (error) {
-                    console.error("M3U Error:", error);
-                    channelListElement.innerHTML = `<li style="padding: 15px; color: #ff8a80;">Error: ${error.message}</li>`;
+                    console.error("Error fetching or parsing M3U:", error);
+                    channelListElement.innerHTML = `<li style="padding: 15px; color: #ff8a80;">Error loading list: ${error.message}</li>`;
                     showChannelInfo("Error loading channels");
-                    if (channelCountElement) channelCountElement.textContent = 'X';
-                } finally { showLoader(false); }
+                    if (channelCountElement) channelCountElement.textContent = 'X'; // Indicate error
+                } finally {
+                    showLoader(false); // Hide loading indicator
+                }
             }
 
-            // --- Parse M3U ---
-            function parseM3U(text) { /* ... (no changes) ... */
-                const lines = text.split('\n'); const parsedChannels = [];
-                let currentChannel = {}; let channelIndex = 0;
+            // --- Parse M3U Text Content ---
+            function parseM3U(text) {
+                const lines = text.split('\n'); // Split text into lines
+                const parsedChannels = [];
+                let currentChannel = {}; // Temporary object for the current channel being parsed
+                let channelIndex = 0; // Assign a unique, sequential index to each valid channel
+
                 for (const line of lines) {
-                    const trimmedLine = line.trim(); if (trimmedLine.startsWith('#EXTM3U')) continue;
+                    const trimmedLine = line.trim(); // Remove leading/trailing whitespace
+
+                    // Skip empty lines or the M3U header
+                    if (!trimmedLine || trimmedLine.startsWith('#EXTM3U')) continue;
+
                     if (trimmedLine.startsWith('#EXTINF:')) {
-                        currentChannel = { name: 'Unknown', url: '', logo: null, group: '', index: channelIndex };
-                        const infoLine = trimmedLine.substring(8); const commaIndex = infoLine.lastIndexOf(',');
-                        if (commaIndex === -1) { console.warn("Malformed #EXTINF:", trimmedLine); currentChannel = {}; continue; }
-                        const attributesPart = infoLine.substring(0, commaIndex); const namePart = infoLine.substring(commaIndex + 1);
-                        currentChannel.name = namePart.trim() || 'Unknown';
-                        const logoMatch = attributesPart.match(/tvg-logo="([^"]*)"/); if (logoMatch?.[1]) currentChannel.logo = logoMatch[1];
-                        const groupMatch = attributesPart.match(/group-title="([^"]*)"/); if (groupMatch?.[1]) currentChannel.group = groupMatch[1];
+                        // Start of a new channel entry
+                        currentChannel = { name: 'Unknown Channel', url: '', logo: null, group: '', index: channelIndex }; // Initialize with defaults and index
+
+                        const infoLine = trimmedLine.substring(8); // Get the part after #EXTINF:
+                        const commaIndex = infoLine.lastIndexOf(','); // Find the last comma separating attributes and name
+
+                        if (commaIndex === -1) {
+                            console.warn("Malformed #EXTINF line (missing comma):", trimmedLine);
+                            currentChannel = {}; // Reset if malformed
+                            continue;
+                        }
+
+                        const attributesPart = infoLine.substring(0, commaIndex); // Part with tvg-logo, group-title etc.
+                        const namePart = infoLine.substring(commaIndex + 1); // Part after the last comma is the name
+
+                        currentChannel.name = namePart.trim() || 'Unknown Channel'; // Assign name
+
+                        // Extract attributes using regex (case-insensitive)
+                        const logoMatch = attributesPart.match(/tvg-logo="([^"]*)"/i);
+                        if (logoMatch && logoMatch[1]) currentChannel.logo = logoMatch[1];
+
+                        const groupMatch = attributesPart.match(/group-title="([^"]*)"/i);
+                        if (groupMatch && groupMatch[1]) currentChannel.group = groupMatch[1];
+
                     } else if (trimmedLine && !trimmedLine.startsWith('#')) {
-                        if (currentChannel.name) {
+                        // This line should be the URL for the previously parsed #EXTINF
+                        if (currentChannel.name !== 'Unknown Channel') { // Check if we have a valid channel object started
                             currentChannel.url = trimmedLine;
-                            if (currentChannel.url?.startsWith('http')) { parsedChannels.push(currentChannel); channelIndex++; }
-                            else { console.warn(`Skipped channel "${currentChannel.name}" (bad URL): ${currentChannel.url}`); }
-                            currentChannel = {};
+
+                            // Basic validation: Check if URL starts with http(s)
+                            if (currentChannel.url && (currentChannel.url.startsWith('http://') || currentChannel.url.startsWith('https://'))) {
+                                parsedChannels.push(currentChannel); // Add the complete channel object to the list
+                                channelIndex++; // Increment index for the next valid channel
+                            } else {
+                                console.warn(`Skipped channel "${currentChannel.name}" due to invalid or missing URL: ${currentChannel.url}`);
+                            }
+                            currentChannel = {}; // Reset for the next channel
                         }
                     }
-                } return parsedChannels;
-             }
+                }
+                return parsedChannels; // Return the array of parsed channel objects
+            }
 
-             // --- Render Channel List (with Favorites Sorting) ---
+            // --- Render Channel List (with Favorites Sorting) ---
             function renderChannelList() {
                 console.log("renderChannelList START");
+                // Store current scroll position to restore it after re-rendering
                 const currentScrollTop = channelListContainer.scrollTop;
 
+                // Sort channels: Favorites first, then by original index
                 channels.sort((a, b) => {
-                    const aIsFav = favoriteChannels.has(a.url); const bIsFav = favoriteChannels.has(b.url);
-                    if (aIsFav && !bIsFav) return -1; if (!aIsFav && bIsFav) return 1;
-                    return a.index - b.index;
+                    const aIsFav = favoriteChannels.has(a.url);
+                    const bIsFav = favoriteChannels.has(b.url);
+                    if (aIsFav && !bIsFav) return -1; // a (fav) comes before b (not fav)
+                    if (!aIsFav && bIsFav) return 1; // b (fav) comes before a (not fav)
+                    return a.index - b.index; // Otherwise, sort by original index
                 });
+
+                // Clear the existing list
                 channelListElement.innerHTML = '';
+
+                // Create and append list items for each channel
                 channels.forEach((channel) => {
-                    const index = channel.index; const listItem = document.createElement('li');
-                    listItem.className = 'channel-item'; listItem.dataset.index = index; listItem.tabIndex = 0;
+                    const index = channel.index; // Use the persistent logical index
+                    const listItem = document.createElement('li');
+                    listItem.className = 'channel-item';
+                    listItem.dataset.index = index; // Store logical index in data attribute
+                    listItem.tabIndex = 0; // Make item focusable
+
+                    // Add channel logo if available
                     if (channel.logo) {
-                        const logoImg = document.createElement('img'); logoImg.src = channel.logo; logoImg.alt = '';
-                        logoImg.className = 'channel-logo'; logoImg.loading = 'lazy';
-                        logoImg.onerror = (e) => { e.target.style.display = 'none'; }; listItem.appendChild(logoImg);
+                        const logoImg = document.createElement('img');
+                        logoImg.src = channel.logo;
+                        logoImg.alt = ''; // Decorative image
+                        logoImg.className = 'channel-logo';
+                        logoImg.loading = 'lazy'; // Lazy load images for performance
+                        logoImg.onerror = (e) => { e.target.style.display = 'none'; }; // Hide broken images
+                        listItem.appendChild(logoImg);
                     }
-                    const nameSpan = document.createElement('span'); nameSpan.className = 'channel-name';
-                    nameSpan.textContent = channel.name || 'Unknown'; listItem.appendChild(nameSpan);
-                    const favButton = document.createElement('button'); favButton.className = 'favorite-btn';
-                    favButton.setAttribute('aria-label', 'Mark favorite'); favButton.dataset.channelUrl = channel.url;
-                    // --- MODIFICACIÓN: Quitar fill="currentColor" del path ---
+
+                    // Add channel name
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'channel-name';
+                    nameSpan.textContent = channel.name || 'Unknown Channel';
+                    listItem.appendChild(nameSpan);
+
+                    // Add favorite button
+                    const favButton = document.createElement('button');
+                    favButton.className = 'favorite-btn';
+                    favButton.setAttribute('aria-label', 'Mark as favorite');
+                    favButton.dataset.channelUrl = channel.url; // Store URL for toggling
+                    // SVG Star Icon (Path fill color controlled by CSS)
                     favButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
 
+                    // Add 'is-favorite' class if the channel URL is in the favorites Set
                     if (favoriteChannels.has(channel.url)) {
                         favButton.classList.add('is-favorite');
-                        favButton.setAttribute('aria-label', 'Remove favorite');
+                        favButton.setAttribute('aria-label', 'Remove from favorites');
                         // console.log(`renderChannelList: Added 'is-favorite' class to button for channel index ${index} (${channel.name})`);
                     }
 
+                    // Favorite button click listener
                     favButton.addEventListener('click', (event) => {
-                        event.stopPropagation();
+                        event.stopPropagation(); // Prevent channel selection when clicking the button
                         console.log("Favorite button CLICKED.");
-                        toggleFavorite(channel.url, favButton); // Pass button (though direct manipulation removed)
+                        toggleFavorite(channel.url, favButton); // Toggle the favorite status
+
+                        // --- Re-render and Re-focus ---
+                        // Get the logical index of the item whose favorite button was clicked
                         const currentFocusedIndex = parseInt(listItem.dataset.index, 10);
                         console.log("Calling renderChannelList after favorite button click");
-                        renderChannelList();
+                        renderChannelList(); // Re-render the list to reflect sorting changes
                         console.log("Requesting animation frame for focus after favorite button click");
+                        // Use rAF to ensure focus happens after the re-render
                         requestAnimationFrame(() => {
                             console.log(`rAF (after fav click): Calling focusChannel(${currentFocusedIndex})`);
-                            focusChannel(currentFocusedIndex);
+                            focusChannel(currentFocusedIndex); // Re-focus the same logical channel
                         });
-                    }); listItem.appendChild(favButton);
+                    });
+                    listItem.appendChild(favButton);
+
+                    // Channel item click listener
                     listItem.addEventListener('click', () => selectAndPlayChannel(index));
+
+                    // Focus/Blur listeners for keyboard navigation state
                     listItem.addEventListener('focus', () => isSidebarFocused = true);
                     listItem.addEventListener('blur', () => isSidebarFocused = false);
-                    channelListElement.appendChild(listItem);
+
+                    channelListElement.appendChild(listItem); // Add the item to the list
                 });
 
+                // Restore scroll position after re-rendering
                 channelListContainer.scrollTop = currentScrollTop;
 
                 console.log("renderChannelList END");
             }
+
 
             // --- Favorite Logic ---
             function toggleFavorite(channelUrl, buttonElement) { // buttonElement is the <button>
@@ -339,239 +630,534 @@
                 if (favoriteChannels.has(channelUrl)) {
                     favoriteChannels.delete(channelUrl);
                     isNowFavorite = false; // State after toggle
-                    console.log(`Favorite removed: ${channelUrl}`); showChannelInfo(`"${channelName}" removed from Favorites`);
+                    console.log(`Favorite removed: ${channelUrl}`);
+                    showChannelInfo(`"${channelName}" removed from Favorites`);
+                    // Update aria-label (though it will be reset on re-render)
+                    // buttonElement.setAttribute('aria-label', 'Mark as favorite');
                 } else {
                     favoriteChannels.add(channelUrl);
                     isNowFavorite = true; // State after toggle
-                    console.log(`Favorite added: ${channelUrl}`); showChannelInfo(`"${channelName}" added to Favorites`);
+                    console.log(`Favorite added: ${channelUrl}`);
+                    showChannelInfo(`"${channelName}" added to Favorites`);
+                    // Update aria-label (though it will be reset on re-render)
+                    // buttonElement.setAttribute('aria-label', 'Remove from favorites');
                 }
 
                 // --- Direct Style Manipulation REMOVED ---
-                // Let CSS handle the coloring based on the class added in renderChannelList
+                // CSS now handles the visual state based on the 'is-favorite' class,
+                // which is applied during the renderChannelList function.
+                // We no longer need to directly manipulate the button's class here.
+                // buttonElement.classList.toggle('is-favorite', isNowFavorite);
 
                 console.log(`Favorite state after toggle: ${isNowFavorite}. Saving to LS.`);
-                saveToLocalStorage(FAVORITES_STORAGE_KEY, Array.from(favoriteChannels));
-                // renderChannelList will be called *after* this function returns in the keydown handler
+                saveToLocalStorage(FAVORITES_STORAGE_KEY, Array.from(favoriteChannels)); // Save the updated Set
+
+                // Note: renderChannelList() is called *after* this function returns
+                // in the event listener (click or keydown) that called toggleFavorite.
             }
 
 
             // --- Video Playback ---
-            function playChannel(index) { /* ... (no changes) ... */
-                console.log(`Play index: ${index}`);
-                const channel = channels.find(ch => ch.index === index);
-                if (!channel) { console.warn(`Channel ${index} not found.`); showChannelInfo("Error: Channel not found"); return; }
-                currentChannelIndex = index; saveToLocalStorage(LAST_CHANNEL_STORAGE_KEY, currentChannelIndex);
-                showLoader(true); video.style.opacity = 0.5;
-                console.log(`Playing [${index}]: ${channel.name} (${channel.url})`); showChannelInfo(channel.name);
-                video.pause(); clearAutoHideTimer();
-                const videoUrl = channel.url; const isHlsStream = videoUrl.toLowerCase().endsWith('.m3u8');
-                try {
-                    if (isHlsStream) {
-                        if (hls) {
-                            console.log("Using HLS.js"); hls.stopLoad(); hls.detachMedia(); hls.loadSource(videoUrl); hls.attachMedia(video);
-                            hls.once(Hls.Events.MANIFEST_PARSED, () => video.play().catch(handlePlayError));
-                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                            console.log("Using native HLS"); video.removeAttribute('src'); video.src = ''; video.load(); video.src = videoUrl;
-                            video.addEventListener('loadedmetadata', () => video.play().catch(handlePlayError), { once: true });
-                            video.addEventListener('error', (e) => handleError(channel, { type: 'Native HLS Error', details: video.error?.message || 'Err' }), { once: true });
-                        } else { throw new Error('HLS not supported.'); }
-                    } else {
-                        console.log("Using direct playback"); if (hls) { hls.stopLoad(); hls.detachMedia(); }
-                        video.removeAttribute('src'); video.src = ''; video.load(); video.src = videoUrl;
-                        video.play().catch(handlePlayError);
-                        video.addEventListener('error', (e) => handleError(channel, { type: 'Direct Error', details: video.error?.message || 'Err' }), { once: true });
-                    }
-                } catch (error) { console.error("Setup error:", error); handleError(channel, { type: 'Setup Error', details: error.message, fatal: true }); }
-                video.removeEventListener('playing', onPlaying); video.addEventListener('playing', onPlaying);
-             }
-            function onPlaying() { console.log("Playing event."); showLoader(false); video.style.opacity = 1; startAutoHideTimer(); }
-            function handlePlayError(e) { console.error("Play error:", e); showLoader(false); video.style.opacity = 1; showChannelInfo(`Play Error: ${e.name}`); clearAutoHideTimer(); }
+            function playChannel(index) {
+                console.log(`Attempting to play channel with logical index: ${index}`);
+                const channel = channels.find(ch => ch.index === index); // Find channel by logical index
 
-            // --- Handle General Errors ---
-            function handleError(channel, errorData) { /* ... (no changes) ... */
-                 const channelName = channel ? channel.name : 'unknown'; const channelIndex = channel ? channel.index : -1;
-                 console.error(`Error channel "${channelName}" [${channelIndex}]:`, errorData);
-                 showLoader(false); video.style.opacity = 1;
-                 let errorMsg = `Error: ${channelName}`;
-                 if (errorData?.type === Hls.ErrorTypes.NETWORK_ERROR) errorMsg += ` (Net: ${errorData.details})`;
-                 else if (errorData?.type === Hls.ErrorTypes.MEDIA_ERROR) errorMsg += ` (Media: ${errorData.details})`;
-                 else if (errorData?.details) errorMsg += ` (${errorData.details})`;
-                 else if (typeof errorData === 'string') errorMsg += ` (${errorData})`;
-                 if (errorData?.fatal) {
-                     errorMsg += " - Stream lost/unavailable."; console.warn("Fatal error. No auto switch.");
-                     if (hls && hls.media === video) { hls.stopLoad(); }
-                 }
-                 showChannelInfo(errorMsg + " Select another channel."); clearAutoHideTimer();
-             }
-
-            // --- Select and Play ---
-            function selectAndPlayChannel(index) { /* ... (no changes) ... */
-                 console.log(`Select & Play: ${index}`);
-                 const channel = channels.find(ch => ch.index === index);
-                 if (!channel) { console.warn(`Invalid channel: ${index}`); return; }
-                 focusChannel(index); // Ensure focus and centering before playing
-                 playChannel(index);
-             }
-
-            // --- UI Functions ---
-            function showLoader(show) { loaderElement.style.display = show ? 'block' : 'none'; }
-            function clearAutoHideTimer() { if (autoHideSidebarTimeoutId) { clearTimeout(autoHideSidebarTimeoutId); autoHideSidebarTimeoutId = null; } }
-            function startAutoHideTimer() { clearAutoHideTimer(); autoHideSidebarTimeoutId = setTimeout(() => { if (!sidebar.classList.contains('hidden') && !video.paused) { hideSidebar(); } autoHideSidebarTimeoutId = null; }, 2500); }
-            function toggleSidebar() { clearAutoHideTimer(); sidebar.classList.contains('hidden') ? showSidebar() : hideSidebar(); }
-            function hideSidebar() { if (!sidebar.classList.contains('hidden')) { sidebar.classList.add('hidden'); console.log("Sidebar hidden"); playerContent.focus(); } }
-            function showSidebar() {
-                clearAutoHideTimer();
-                if (sidebar.classList.contains('hidden')) {
-                    sidebar.classList.remove('hidden'); console.log("Sidebar shown");
-                    requestAnimationFrame(() => focusChannel(currentChannelIndex));
-                } else { focusChannel(currentChannelIndex); }
-            }
-
-            /** Highlights the selected channel item. */
-            function highlightChannel(index) { /* ... (no changes) ... */
-                 // console.log(`Highlighting channel index: ${index}`);
-                 channelListElement.querySelectorAll('.channel-item').forEach((item) => {
-                     const itemIndex = parseInt(item.dataset.index, 10);
-                     item.classList.toggle('selected', itemIndex === index);
-                 });
-             }
-
-            /** Sets focus and centers the channel item. */
-            function focusChannel(index, instant = false) { /* ... (no changes) ... */
-                 console.log(`focusChannel START for index: ${index}, instant: ${instant}`); // DEBUG LOG
-                 if (sidebar.classList.contains('hidden')) {
-                     console.log("Sidebar hidden, calling showSidebar first."); // DEBUG LOG
-                     showSidebar(); return;
-                 }
-                 const itemToFocus = channelListElement.querySelector(`.channel-item[data-index="${index}"]`);
-                 if (itemToFocus) {
-                     console.log("Found item to focus:", itemToFocus); // DEBUG LOG
-                     itemToFocus.focus({ preventScroll: true });
-                     highlightChannel(index);
-                     console.log("Calling scrollIntoView center"); // DEBUG LOG
-                     itemToFocus.scrollIntoView({ behavior: instant ? 'instant' : 'smooth', block: 'center', inline: 'nearest' });
-                     console.log("focusChannel END for index:", index); // DEBUG LOG
-                 } else {
-                     console.warn(`Item ${index} not found in focusChannel.`); // DEBUG LOG
-                     const firstItem = channelListElement.querySelector('.channel-item');
-                     if (firstItem) firstItem.focus(); else channelListElement.focus();
-                     console.log("focusChannel END (fallback) for index:", index); // DEBUG LOG
-                 }
-             }
-
-            /** Displays channel info message. */
-            function showChannelInfo(text) { /* ... (no changes) ... */
-                 clearTimeout(channelInfoTimeout); channelInfoElement.textContent = text;
-                 channelInfoElement.classList.add('visible');
-                 channelInfoTimeout = setTimeout(() => { channelInfoElement.classList.remove('visible'); }, 4000);
-             }
-
-            // --- Video Listeners ---
-            video.addEventListener('pause', () => { console.log("Video paused."); clearAutoHideTimer(); });
-            video.addEventListener('ended', () => { console.log("Video ended."); clearAutoHideTimer(); const endedChannel = channels.find(ch=>ch.index===currentChannelIndex); showChannelInfo(`"${endedChannel?.name}" finished.`); });
-            video.addEventListener('volumechange', () => { saveToLocalStorage(VOLUME_STORAGE_KEY, video.volume); saveToLocalStorage(MUTED_STORAGE_KEY, video.muted); });
-
-            // --- Keyboard/Remote Handling ---
-            document.addEventListener('keydown', (event) => { /* ... (no changes in logic, only logs) ... */
-                if (event.target.tagName === 'INPUT' || ['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) return;
-
-                if (sidebar.classList.contains('hidden')) {
-                    if (event.key !== 'Backspace' && event.key !== 'Escape' && event.key !== 'b' && event.key !== 'B') { event.preventDefault(); showSidebar(); return; }
-                    else if (event.key === 'Backspace' || event.key === 'Escape' || event.key === 'b' || event.key === 'B') { event.preventDefault(); return; }
+                if (!channel) {
+                    console.warn(`Channel with logical index ${index} not found.`);
+                    showChannelInfo("Error: Channel not found");
+                    return;
                 }
 
+                // Update state and save last played channel
+                currentChannelIndex = index;
+                saveToLocalStorage(LAST_CHANNEL_STORAGE_KEY, currentChannelIndex);
+
+                showLoader(true); // Show spinner
+                video.style.opacity = 0.5; // Dim video slightly while loading
+
+                console.log(`Playing [${index}]: ${channel.name} (${channel.url})`);
+                showChannelInfo(channel.name); // Display channel name
+
+                video.pause(); // Pause current playback if any
+                clearAutoHideTimer(); // Stop sidebar auto-hide timer
+
+                const videoUrl = channel.url;
+                const isHlsStream = videoUrl.toLowerCase().endsWith('.m3u8'); // Check if it's an HLS stream
+
+                try {
+                    if (isHlsStream) {
+                        if (hls) { // Use HLS.js if supported and initialized
+                            console.log("Using HLS.js for playback");
+                            hls.stopLoad(); // Stop previous load if any
+                            hls.detachMedia(); // Detach from video element temporarily
+                            hls.loadSource(videoUrl); // Load the new source
+                            hls.attachMedia(video); // Re-attach to video element
+                            // Play when manifest is parsed
+                            hls.once(Hls.Events.MANIFEST_PARSED, () => {
+                                video.play().catch(handlePlayError);
+                            });
+                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) { // Fallback to native HLS support
+                            console.log("Using native HLS playback");
+                            // Resetting src is important for some browsers to switch streams
+                            video.removeAttribute('src');
+                            video.src = '';
+                            video.load(); // Important: call load() after clearing src
+                            video.src = videoUrl;
+                            // Play when metadata is loaded
+                            video.addEventListener('loadedmetadata', () => {
+                                video.play().catch(handlePlayError);
+                            }, { once: true });
+                            // Add specific error handler for native playback
+                            video.addEventListener('error', (e) => handleError(channel, { type: 'Native HLS Error', details: video.error?.message || 'Unknown Error' }), { once: true });
+                        } else {
+                            // Neither HLS.js nor native HLS is supported
+                            throw new Error('HLS playback is not supported in this browser.');
+                        }
+                    } else { // For non-HLS streams (e.g., MP4, WebM)
+                        console.log("Using direct video playback");
+                        if (hls) { // Detach HLS.js if it was attached
+                            hls.stopLoad();
+                            hls.detachMedia();
+                        }
+                        // Resetting src for direct playback too
+                        video.removeAttribute('src');
+                        video.src = '';
+                        video.load();
+                        video.src = videoUrl;
+                        video.play().catch(handlePlayError);
+                        // Add error handler for direct playback
+                        video.addEventListener('error', (e) => handleError(channel, { type: 'Direct Playback Error', details: video.error?.message || 'Unknown Error' }), { once: true });
+                    }
+                } catch (error) {
+                    console.error("Error setting up video source:", error);
+                    handleError(channel, { type: 'Setup Error', details: error.message, fatal: true });
+                }
+
+                // Add 'playing' listener to hide loader and restore opacity
+                video.removeEventListener('playing', onPlaying); // Remove previous listener if any
+                video.addEventListener('playing', onPlaying, { once: true }); // Use once to ensure it only fires once per play attempt
+            }
+
+            // Handler for when video starts playing successfully
+            function onPlaying() {
+                console.log("Video 'playing' event triggered.");
+                showLoader(false); // Hide spinner
+                video.style.opacity = 1; // Restore full opacity
+                startAutoHideTimer(); // Start timer to hide sidebar
+            }
+
+            // Handler for video play() promise rejection
+            function handlePlayError(e) {
+                console.error("Error starting playback:", e);
+                showLoader(false); // Hide spinner
+                video.style.opacity = 1; // Restore opacity
+                showChannelInfo(`Playback Error: ${e.name}`); // Show error info
+                clearAutoHideTimer(); // Stop sidebar timer
+            }
+
+
+            // --- Handle General Errors (HLS.js, Native, Setup) ---
+            function handleError(channel, errorData) {
+                 const channelName = channel ? channel.name : 'the stream';
+                 const channelIndex = channel ? channel.index : 'N/A';
+                 console.error(`Error on channel "${channelName}" [Index: ${channelIndex}]:`, errorData);
+
+                 showLoader(false); // Ensure loader is hidden
+                 video.style.opacity = 1; // Ensure video is visible
+
+                 // Construct a user-friendly error message
+                 let errorMsg = `Error playing ${channelName}`;
+                 if (errorData) {
+                     if (errorData.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                         errorMsg += ` (Network Error: ${errorData.details})`;
+                     } else if (errorData.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                         errorMsg += ` (Media Error: ${errorData.details})`;
+                     } else if (errorData.details) {
+                         // General details if available
+                         errorMsg += ` (${errorData.details})`;
+                     } else if (typeof errorData === 'string') {
+                         // If errorData is just a string
+                         errorMsg += ` (${errorData})`;
+                     }
+                 }
+
+                 // Check if the error is marked as fatal (stream likely dead)
+                 if (errorData?.fatal) {
+                     errorMsg += " - Stream may be unavailable.";
+                     console.warn("Fatal error occurred. Stopping playback attempts for this source.");
+                     // Stop HLS.js loading if it was the source of the error
+                     if (hls && hls.media === video && channel && hls.url === channel.url) {
+                         hls.stopLoad();
+                     }
+                     // Consider stopping native playback too if applicable, though harder to track source
+                 }
+
+                 showChannelInfo(errorMsg + ". Try another channel."); // Display the error
+                 clearAutoHideTimer(); // Stop sidebar auto-hide timer
+             }
+
+
+            // --- Select Channel in List and Initiate Playback ---
+            function selectAndPlayChannel(index) {
+                console.log(`selectAndPlayChannel called for logical index: ${index}`);
+                const channel = channels.find(ch => ch.index === index); // Find by logical index
+                if (!channel) {
+                    console.warn(`Invalid channel index for selection: ${index}`);
+                    return;
+                }
+                // First, focus and highlight the channel in the list
+                focusChannel(index);
+                // Then, initiate playback
+                playChannel(index);
+            }
+
+            // --- UI Helper Functions ---
+            function showLoader(show) {
+                loaderElement.style.display = show ? 'block' : 'none';
+            }
+
+            function clearAutoHideTimer() {
+                if (autoHideSidebarTimeoutId) {
+                    clearTimeout(autoHideSidebarTimeoutId);
+                    autoHideSidebarTimeoutId = null;
+                }
+            }
+
+            function startAutoHideTimer() {
+                clearAutoHideTimer(); // Clear any existing timer
+                // Hide sidebar after 2.5 seconds if it's visible and video is playing
+                autoHideSidebarTimeoutId = setTimeout(() => {
+                    if (!sidebar.classList.contains('hidden') && !video.paused) {
+                        hideSidebar();
+                    }
+                    autoHideSidebarTimeoutId = null; // Clear the ID after execution
+                }, 2500);
+            }
+
+            function toggleSidebar() {
+                clearAutoHideTimer(); // Stop timer when manually toggling
+                if (sidebar.classList.contains('hidden')) {
+                    showSidebar();
+                } else {
+                    hideSidebar();
+                }
+            }
+
+            function hideSidebar() {
+                if (!sidebar.classList.contains('hidden')) {
+                    sidebar.classList.add('hidden');
+                    console.log("Sidebar hidden");
+                    // Optionally move focus away from sidebar elements
+                    // *** MODIFICADO: Enfocar el video en lugar del contenedor para intentar evitar el outline ***
+                    // playerContent.focus();
+                     video.focus({ preventScroll: true }); // Enfocar el video directamente
+                }
+            }
+
+            function showSidebar() {
+                clearAutoHideTimer(); // Stop timer when manually showing
+                if (sidebar.classList.contains('hidden')) {
+                    sidebar.classList.remove('hidden');
+                    console.log("Sidebar shown");
+                    // Use rAF to ensure focus happens after transition/render
+                    requestAnimationFrame(() => focusChannel(currentChannelIndex));
+                } else {
+                    // If already shown, just ensure the current channel is focused
+                    focusChannel(currentChannelIndex);
+                }
+            }
+
+            /** Highlights the selected channel item in the list. */
+            function highlightChannel(index) {
+                // console.log(`Highlighting channel with logical index: ${index}`);
+                channelListElement.querySelectorAll('.channel-item').forEach((item) => {
+                    const itemIndex = parseInt(item.dataset.index, 10); // Get logical index from data attribute
+                    item.classList.toggle('selected', itemIndex === index); // Add/remove 'selected' class
+                });
+            }
+
+            /** Sets focus on and scrolls to the specified channel item. */
+            function focusChannel(index, instant = false) {
+                console.log(`focusChannel START for logical index: ${index}, instant: ${instant}`);
+                // If sidebar is hidden, show it first. The showSidebar function will then call focusChannel again.
+                if (sidebar.classList.contains('hidden')) {
+                    console.log("Sidebar is hidden, calling showSidebar which will then focus.");
+                    showSidebar();
+                    return; // Exit early, showSidebar will handle the focus
+                }
+
+                // Find the list item using the logical index stored in data-index
+                const itemToFocus = channelListElement.querySelector(`.channel-item[data-index="${index}"]`);
+
+                if (itemToFocus) {
+                    console.log("Found item to focus:", itemToFocus);
+                    // Set focus without causing the browser's default scroll behavior
+                    itemToFocus.focus({ preventScroll: true });
+                    // Apply the visual highlight
+                    highlightChannel(index);
+                    // Scroll the item into view within the list container
+                    console.log("Calling scrollIntoView with block: 'center'");
+                    itemToFocus.scrollIntoView({
+                        behavior: instant ? 'instant' : 'smooth', // Use instant scrolling on initial load/major changes
+                        block: 'center', // Try to center the item vertically
+                        inline: 'nearest' // Keep horizontally aligned
+                    });
+                    console.log("focusChannel END for index:", index);
+                } else {
+                    // Fallback if the item isn't found (e.g., list empty, index invalid)
+                    console.warn(`Channel item with logical index ${index} not found in focusChannel.`);
+                    // Try focusing the first item or the list itself as a last resort
+                    const firstItem = channelListElement.querySelector('.channel-item');
+                    if (firstItem) {
+                        firstItem.focus();
+                    } else {
+                        channelListElement.focus(); // Focus the container if no items
+                    }
+                    console.log("focusChannel END (fallback) for index:", index);
+                }
+            }
+
+
+            /** Displays a message in the channel info overlay. */
+            function showChannelInfo(text) {
+                clearTimeout(channelInfoTimeout); // Clear previous timeout
+                channelInfoElement.textContent = text; // Set text content
+                channelInfoElement.classList.add('visible'); // Make it visible
+
+                // Set a timer to hide the info after 4 seconds
+                channelInfoTimeout = setTimeout(() => {
+                    channelInfoElement.classList.remove('visible');
+                }, 4000);
+            }
+
+            // --- Video Event Listeners ---
+            video.addEventListener('pause', () => {
+                console.log("Video paused.");
+                clearAutoHideTimer(); // Stop auto-hiding sidebar on pause
+            });
+
+            video.addEventListener('ended', () => {
+                console.log("Video ended.");
+                clearAutoHideTimer(); // Stop auto-hiding sidebar on end
+                const endedChannel = channels.find(ch => ch.index === currentChannelIndex);
+                showChannelInfo(`"${endedChannel?.name || 'Stream'}" finished.`);
+                // Optional: Auto-play next channel? (Requires more logic)
+            });
+
+            video.addEventListener('volumechange', () => {
+                // Save volume and muted state whenever they change
+                saveToLocalStorage(VOLUME_STORAGE_KEY, video.volume);
+                saveToLocalStorage(MUTED_STORAGE_KEY, video.muted);
+                // Optional: Briefly show volume level?
+                // showChannelInfo(`Volume: ${video.muted ? 'Muted' : Math.round(video.volume * 100) + '%'}`);
+            });
+
+            // --- Keyboard/Remote Control Handling ---
+            document.addEventListener('keydown', (event) => {
+                // Ignore keypresses if focus is inside an input field (future-proofing)
+                if (event.target.tagName === 'INPUT' || ['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
+                    return;
+                }
+
+                // --- Handling when Sidebar is Hidden ---
+                if (sidebar.classList.contains('hidden')) {
+                    // If sidebar is hidden, most keys should show it first
+                    // Exceptions: Back/Escape/B should do nothing if sidebar is already hidden.
+                    if (event.key !== 'Backspace' && event.key !== 'Escape' && event.key !== 'b' && event.key !== 'B') {
+                        event.preventDefault(); // Prevent default action (like scrolling)
+                        showSidebar(); // Show the sidebar
+                        return; // Stop further processing for this key event
+                    } else if (event.key === 'Backspace' || event.key === 'Escape' || event.key === 'b' || event.key === 'B') {
+                        event.preventDefault(); // Prevent default back navigation etc.
+                        return; // Do nothing if trying to hide an already hidden sidebar
+                    }
+                }
+
+                // Determine if focus is currently on a channel item within the visible sidebar
                 isSidebarFocused = sidebar.contains(document.activeElement) && document.activeElement.classList.contains('channel-item');
 
+                // --- Handling when Sidebar is Visible ---
                 if (!sidebar.classList.contains('hidden')) {
                     if (isSidebarFocused) {
+                        // --- Keyboard Actions when Focus is INSIDE the Channel List ---
                         const focusedElement = document.activeElement;
+                        // Get the logical index from the focused element's data attribute
                         const focusedIndex = focusedElement?.classList.contains('channel-item') ? parseInt(focusedElement.dataset.index, 10) : -1;
+
                         switch (event.key) {
-                            case 'ArrowUp': event.preventDefault(); navigateList(-1); break;
-                            case 'ArrowDown': event.preventDefault(); navigateList(1); break;
-                            case 'Enter': case ' ': event.preventDefault(); if (focusedIndex !== -1) { selectAndPlayChannel(focusedIndex); } break;
-                            case 'ArrowRight':
+                            case 'ArrowUp':
                                 event.preventDefault();
-                                console.log(`ArrowRight pressed. Focused Index: ${focusedIndex}`); // DEBUG LOG
-                                if (focusedElement?.classList.contains('channel-item')) {
-                                     const favButton = focusedElement.querySelector('.favorite-btn'); // Get the button element
-                                     const channelUrl = favButton?.dataset.channelUrl;
-                                     console.log(`Channel URL for favorite toggle: ${channelUrl}`); // DEBUG LOG
-                                     if(favButton && channelUrl && focusedIndex !== -1) {
-                                         toggleFavorite(channelUrl, favButton); // Pass the button element here
-                                         console.log("Calling renderChannelList after toggleFavorite"); // DEBUG LOG
-                                         renderChannelList(); // Re-render UI
-                                         console.log("renderChannelList finished. Requesting animation frame for focus."); // DEBUG LOG
-                                         requestAnimationFrame(() => {
-                                             console.log(`rAF (after ArrowRight): Calling focusChannel(${focusedIndex})`); // DEBUG LOG
-                                             focusChannel(focusedIndex); // Restore focus/centering
-                                         });
-                                     } else {
-                                         console.log("Could not find favButton or channelUrl or index was invalid."); // DEBUG LOG
-                                     }
+                                navigateList(-1); // Move selection up
+                                break;
+                            case 'ArrowDown':
+                                event.preventDefault();
+                                navigateList(1); // Move selection down
+                                break;
+                            case 'Enter':
+                            case ' ': // Spacebar also selects
+                                event.preventDefault();
+                                if (focusedIndex !== -1) {
+                                    selectAndPlayChannel(focusedIndex); // Play the focused channel
                                 }
                                 break;
-                            case 'Backspace': case 'Escape': case 'b': case 'B': event.preventDefault(); hideSidebar(); break;
-                            case 'ArrowLeft': event.preventDefault(); break;
+                            case 'ArrowRight': // Use ArrowRight to toggle favorite
+                                event.preventDefault();
+                                console.log(`ArrowRight pressed. Focused Logical Index: ${focusedIndex}`);
+                                if (focusedElement?.classList.contains('channel-item')) {
+                                    const favButton = focusedElement.querySelector('.favorite-btn');
+                                    const channelUrl = favButton?.dataset.channelUrl;
+                                    console.log(`Channel URL for favorite toggle: ${channelUrl}`);
+                                    if(favButton && channelUrl && focusedIndex !== -1) {
+                                        toggleFavorite(channelUrl, favButton); // Toggle favorite status
+                                        console.log("Calling renderChannelList after toggleFavorite (ArrowRight)");
+                                        renderChannelList(); // Re-render to reflect sort change
+                                        console.log("renderChannelList finished. Requesting animation frame for focus.");
+                                        // Re-focus the same logical item after re-render
+                                        requestAnimationFrame(() => {
+                                            console.log(`rAF (after ArrowRight): Calling focusChannel(${focusedIndex})`);
+                                            focusChannel(focusedIndex);
+                                        });
+                                    } else {
+                                        console.log("Could not find favButton or channelUrl or index was invalid for favorite toggle.");
+                                    }
+                                }
+                                break;
+                            case 'Backspace': // Backspace key
+                            case 'Escape':    // Escape key
+                            case 'b':         // 'b' key (common remote back button mapping)
+                            case 'B':
+                                event.preventDefault();
+                                hideSidebar(); // Hide the sidebar
+                                break;
+                            case 'ArrowLeft': // Prevent default browser back navigation if possible
+                                event.preventDefault();
+                                // Could potentially hide sidebar here too, or do nothing
+                                break;
+                            // Add PageUp/PageDown for faster scrolling?
+                            // case 'PageUp': event.preventDefault(); navigateList(-10); break; // Example
+                            // case 'PageDown': event.preventDefault(); navigateList(10); break; // Example
                         }
-                    } else { // Focus outside list, sidebar visible
+                    } else {
+                        // --- Keyboard Actions when Sidebar is Visible but Focus is OUTSIDE the List ---
+                        // (e.g., focus is on the video or somewhere else)
                         switch (event.key) {
-                            case 'Backspace': case 'Escape': case 'b': case 'B': event.preventDefault(); hideSidebar(); break;
-                            case ' ': event.preventDefault(); if (video.src || hls?.url) { if (video.paused) video.play().catch(handlePlayError); else video.pause(); } break;
-                            case 'm': case 'M': event.preventDefault(); video.muted = !video.muted; showChannelInfo(video.muted ? "Muted" : "Unmuted"); break;
-                            case 'ArrowUp': event.preventDefault(); adjustVolume(0.1); break;
-                            case 'ArrowDown': event.preventDefault(); adjustVolume(-0.1); break;
-                            case 'f': case 'F': event.preventDefault(); toggleFullScreen(); break;
-                            case 'ArrowLeft': case 'ArrowRight': event.preventDefault(); break;
+                            case 'Backspace':
+                            case 'Escape':
+                            case 'b':
+                            case 'B':
+                                event.preventDefault();
+                                hideSidebar(); // Hide the sidebar
+                                break;
+                            case ' ': // Spacebar toggles play/pause if video has a source
+                                event.preventDefault();
+                                if (video.src || (hls && hls.url)) { // Check if video is loaded
+                                    if (video.paused) {
+                                        video.play().catch(handlePlayError);
+                                    } else {
+                                        video.pause();
+                                    }
+                                }
+                                break;
+                            case 'm': // Mute toggle
+                            case 'M':
+                                event.preventDefault();
+                                video.muted = !video.muted;
+                                showChannelInfo(video.muted ? "Muted" : "Unmuted");
+                                break;
+                            case 'ArrowUp': // Volume Up
+                                event.preventDefault();
+                                adjustVolume(0.1);
+                                break;
+                            case 'ArrowDown': // Volume Down
+                                event.preventDefault();
+                                adjustVolume(-0.1);
+                                break;
+                            case 'f': // Fullscreen toggle
+                            case 'F':
+                                event.preventDefault();
+                                toggleFullScreen();
+                                break;
+                            case 'ArrowLeft': // Seek back? (Requires more complex logic)
+                            case 'ArrowRight': // Seek forward? (Requires more complex logic)
+                                event.preventDefault();
+                                // Example: video.currentTime -= 10;
+                                break;
                         }
                     }
                 }
             });
 
-            // --- List Navigation ---
-            function navigateList(direction) { /* ... (no changes) ... */
-                 if (channels.length === 0) return;
-                 const items = Array.from(channelListElement.querySelectorAll('.channel-item'));
-                 const currentFocusedElement = document.activeElement;
-                 let currentVisualIndex = -1;
-                 if (currentFocusedElement && currentFocusedElement.classList.contains('channel-item')) { currentVisualIndex = items.indexOf(currentFocusedElement); }
-                 else { const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex); currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : 0; }
-                 let nextVisualIndex = currentVisualIndex + direction;
-                 nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1));
-                 if (nextVisualIndex !== currentVisualIndex && items[nextVisualIndex]) {
-                     const nextElement = items[nextVisualIndex]; const nextLogicalIndex = parseInt(nextElement.dataset.index, 10);
-                     currentChannelIndex = nextLogicalIndex; // Update logical index first
-                     focusChannel(currentChannelIndex); // Focus and center the new item
-                 } else if (items[currentVisualIndex]){ focusChannel(parseInt(items[currentVisualIndex].dataset.index, 10)); } // Re-center if at boundary
-             }
+            // --- List Navigation Logic ---
+            function navigateList(direction) {
+                if (channels.length === 0) return; // Do nothing if list is empty
 
-            // --- Adjust Volume ---
-            function adjustVolume(change) { /* ... (no changes) ... */
-                 let newVolume = Math.max(0, Math.min(1, video.volume + change)); video.volume = newVolume;
-                 if (change > 0 && video.muted) video.muted = false;
-                 showChannelInfo(`Volume: ${Math.round(video.volume * 100)}%`);
-             }
+                const items = Array.from(channelListElement.querySelectorAll('.channel-item')); // Get all visible items in current sort order
+                if (items.length === 0) return;
 
-            // --- Fullscreen ---
-            function toggleFullScreen() { /* ... (no changes) ... */
-                 const elem = document.documentElement;
-                 if (!document.fullscreenElement) {
-                     if (elem.requestFullscreen) { elem.requestFullscreen().catch(err => { console.error(`FS Error: ${err.message}`); showChannelInfo("Fullscreen unavailable"); }); }
-                     else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
-                     else { showChannelInfo("Fullscreen not supported"); } console.log("Entering fullscreen");
-                 } else {
-                     if (document.exitFullscreen) { document.exitFullscreen(); } else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } else if (document.msExitFullscreen) { document.msExitFullscreen(); }
-                     console.log("Exiting fullscreen");
-                 }
-             }
+                const currentFocusedElement = document.activeElement;
+                let currentVisualIndex = -1; // Index in the *currently rendered* list (items array)
+
+                // Find the visual index of the currently focused item
+                if (currentFocusedElement && currentFocusedElement.classList.contains('channel-item')) {
+                    currentVisualIndex = items.indexOf(currentFocusedElement);
+                } else {
+                    // If focus is not on an item, find the visual index corresponding to the *logical* currentChannelIndex
+                    const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex);
+                    currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : 0; // Default to 0 if not found
+                }
+
+                // Calculate the next visual index based on direction
+                let nextVisualIndex = currentVisualIndex + direction;
+
+                // Clamp the index within the bounds of the visual list
+                nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1));
+
+                // If the index changed, focus the new item
+                if (nextVisualIndex !== currentVisualIndex && items[nextVisualIndex]) {
+                    const nextElement = items[nextVisualIndex];
+                    // Get the logical index from the next element's data attribute
+                    const nextLogicalIndex = parseInt(nextElement.dataset.index, 10);
+                    // Update the logical currentChannelIndex *before* focusing
+                    // This ensures subsequent actions (like play) use the correct logical index
+                    currentChannelIndex = nextLogicalIndex;
+                    // Focus the visually next item (which corresponds to the new logical index)
+                    focusChannel(currentChannelIndex); // Use the logical index for focus function
+                } else if (items[currentVisualIndex]) {
+                    // If navigation didn't change the item (e.g., at top/bottom), re-focus the current one
+                    // This helps ensure it's centered if scrollIntoView didn't fully center before
+                    focusChannel(parseInt(items[currentVisualIndex].dataset.index, 10));
+                }
+            }
+
+
+            // --- Volume Adjustment ---
+            function adjustVolume(change) {
+                let newVolume = video.volume + change;
+                newVolume = Math.max(0, Math.min(1, newVolume)); // Clamp between 0 and 1
+                video.volume = newVolume;
+                video.muted = false; // Unmute when adjusting volume
+                showChannelInfo(`Volume: ${Math.round(video.volume * 100)}%`);
+            }
+
+            // --- Fullscreen Toggle ---
+            function toggleFullScreen() {
+                if (!document.fullscreenElement) {
+                    // Request fullscreen on the player container or the whole body
+                    (playerContent || document.documentElement).requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                        showChannelInfo("Fullscreen not supported or denied.");
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            }
 
             // --- Initial Load ---
-            fetchAndParseM3U(m3uUrl);
+            fetchAndParseM3U(m3uUrl); // Start the process by fetching the M3U
 
-            // --- Player Click Listener ---
-            playerContent.addEventListener('click', (event) => { if (event.target === playerContent) { toggleSidebar(); } });
-
-        });
+        }); // End DOMContentLoaded
     </script>
 </body>
 </html>
