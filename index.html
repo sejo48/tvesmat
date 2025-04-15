@@ -3,1161 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Smart TV M3U v14.7 (Sin Outline Amarillo)</title>
+    <title>Reproductor Estilo YouTube (Modo Oscuro Corregido)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* --- CSS Variables --- */
-        :root {
-            --primary-bg: #121212; /* Dark background for the main app */
-            --secondary-bg: #1e1e1e; /* Slightly lighter background for sidebar */
-            --tertiary-bg: #2a2a2a; /* Background for interactive elements and borders */
-            --text-color: #e0e0e0; /* Primary text color */
-            --text-secondary-color: #b3b3b3; /* Secondary text color (e.g., non-selected items, default star) */
-            --highlight-color: #1DB954; /* Accent color for selected items (Spotify green) */
-            --favorite-color: #FFD700; /* Color for favorite items (Gold) */
-            --sidebar-width: 240px; /* Default width of the sidebar */
-            --border-radius: 4px; /* Standard border radius for elements */
-            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* System font stack */
-            --transition-speed: 0.4s; /* Speed for animations */
-            --timing-function: cubic-bezier(0.645, 0.045, 0.355, 1.000); /* Smooth easing for transitions */
+        /* Estilos personalizados adicionales */
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow-y: hidden;
+            /* Transición suave de colores */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
+        /* Estilo para la barra de progreso del vídeo */
+        input[type="range"]::-webkit-slider-runnable-track { background: #e0e0e0; height: 5px; border-radius: 3px; }
+        input[type="range"]::-moz-range-track { background: #e0e0e0; height: 5px; border-radius: 3px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; background: #ff0000; border-radius: 50%; cursor: pointer; margin-top: -5px; }
+        input[type="range"]::-moz-range-thumb { width: 15px; height: 15px; background: #ff0000; border-radius: 50%; cursor: pointer; border: none; }
 
-        /* --- Reset and Globals --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            height: 100%;
-            overflow: hidden; /* Prevent scrolling on the body */
-            background-color: var(--primary-bg);
-            color: var(--text-color);
-            font-family: var(--font-family);
-        }
-        .player-container {
-            display: flex; /* Use flexbox for layout */
-            height: 100%;
-            width: 100%;
-            position: relative; /* Needed for absolute positioning of children */
-            overflow: hidden; /* Hide anything that overflows */
-        }
+        /* Estilos Dark Mode para la barra de progreso */
+        .dark input[type="range"]::-webkit-slider-runnable-track { background: #4b5563; } /* gray-600 */
+        .dark input[type="range"]::-moz-range-track { background: #4b5563; } /* gray-600 */
+        /* Thumb se mantiene rojo */
 
-        /* --- Sidebar --- */
-        #sidebar {
-            width: var(--sidebar-width);
-            min-width: var(--sidebar-width); /* Prevent shrinking below the defined width */
-            background-color: var(--secondary-bg);
-            height: 100%;
-            overflow: hidden; /* Initially hide overflow */
-            transition: transform var(--transition-speed) var(--timing-function),
-                        width var(--transition-speed) var(--timing-function),
-                        min-width var(--transition-speed) var(--timing-function),
-                        padding var(--transition-speed) var(--timing-function),
-                        border var(--transition-speed) var(--timing-function); /* Smooth transitions for hiding/showing */
-            z-index: 10; /* Keep sidebar above player content */
-            border-right: 1px solid var(--tertiary-bg); /* Separator line */
-            display: flex;
-            flex-direction: column; /* Stack header and list vertically */
-            flex-shrink: 0; /* Prevent sidebar from shrinking when content grows */
+        video::-webkit-media-controls { display:none !important; }
+        video::-webkit-media-controls-enclosure { display:none !important; }
+        video::-webkit-media-controls-panel { display:none !important; }
+        video::-webkit-media-controls-play-button { display:none !important; }
+        video::-webkit-media-controls-start-playback-button { display:none !important; }
+        @media (max-width: 768px) {
+            #sidebar { display: none; position: fixed; top: 0; left: 0; height: 100%; z-index: 40; transition: transform 0.3s ease-in-out; transform: translateX(-100%); }
+            #sidebar.open { display: block; transform: translateX(0); }
         }
-        /* Styles for when the sidebar is hidden */
-        #sidebar.hidden {
-            transform: translateX(-100%); /* Slide out to the left */
-            width: 0;
-            min-width: 0;
-            padding: 0;
-            border: none;
-            overflow: hidden; /* Ensure content is clipped */
-        }
-
-        /* --- Sidebar Header --- */
-        .sidebar-header {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--tertiary-bg);
-            transition: padding var(--transition-speed) var(--timing-function),
-                        border var(--transition-speed) var(--timing-function),
-                        height var(--transition-speed) var(--timing-function),
-                        opacity var(--transition-speed) var(--timing-function); /* Animate header properties */
-            display: flex;
-            align-items: center;
-            justify-content: center; /* Center logo and count */
-            gap: 10px; /* Space between logo and count */
-            height: 70px; /* Fixed height */
-            opacity: 1;
-            flex-shrink: 0; /* Prevent header from shrinking */
-        }
-        /* Styles for the header when the sidebar is hidden */
-        #sidebar.hidden .sidebar-header {
-            padding: 0;
-            border: none;
-            height: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-        .app-logo {
-            max-width: 70%;
-            max-height: 40px;
-            object-fit: contain; /* Scale logo while preserving aspect ratio */
-            display: block; /* Remove extra space below image */
-        }
-        .channel-count {
-            background-color: var(--tertiary-bg);
-            color: var(--text-color);
-            font-size: 0.75em;
-            font-weight: bold;
-            border-radius: 50%; /* Make it circular */
-            width: 28px;
-            height: 28px;
-            display: inline-flex; /* Use flex to center content */
-            align-items: center;
-            justify-content: center;
-            line-height: 1; /* Ensure text is vertically centered */
-            flex-shrink: 0; /* Prevent shrinking */
-            transition: opacity var(--transition-speed) var(--timing-function);
-        }
-        /* Hide channel count when sidebar is hidden */
-        #sidebar.hidden .channel-count {
-            opacity: 0;
-        }
-
-        /* --- Channel List --- */
-        .channel-list-container {
-            flex-grow: 1; /* Allow container to fill remaining space */
-            overflow-y: auto; /* Enable vertical scrolling */
-            transition: opacity var(--transition-speed) var(--timing-function);
-        }
-        /* Hide list container when sidebar is hidden */
-        #sidebar.hidden .channel-list-container {
-            opacity: 0;
-        }
-
-        /* --- Custom Scrollbar --- */
-        .channel-list-container::-webkit-scrollbar { width: 10px; }
-        .channel-list-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 5px; }
-        .channel-list-container::-webkit-scrollbar-thumb { background-color: var(--tertiary-bg); border-radius: 5px; border: 2px solid var(--secondary-bg); }
-        .channel-list-container::-webkit-scrollbar-thumb:hover { background-color: #555; }
-        .channel-list { list-style: none; padding: 0; }
-
-        /* --- Channel Item --- */
-        .channel-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--tertiary-bg);
-            transition: background-color 0.15s ease-out, color 0.15s ease-out; /* Quick hover effect */
-            font-size: 0.95em;
-            white-space: nowrap; /* Prevent text wrapping */
-            overflow: hidden;
-            text-overflow: ellipsis; /* Show ellipsis (...) for overflow */
-            color: var(--text-secondary-color); /* Default text color */
-            position: relative; /* For absolute positioning of favorite button */
-        }
-        .channel-item:last-child { border-bottom: none; } /* Remove border from last item */
-        .channel-logo {
-            width: 32px;
-            height: 32px;
-            margin-right: 12px;
-            object-fit: contain; /* Scale logo nicely */
-            flex-shrink: 0; /* Prevent logo from shrinking */
-            background-color: rgba(255, 255, 255, 0.1); /* Subtle background for logos */
-            border-radius: var(--border-radius);
-            vertical-align: middle; /* Align nicely with text */
-        }
-        .channel-name {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex-grow: 1; /* Allow name to take available space */
-            margin-right: 30px; /* Space before favorite button */
-        }
-        /* Hover/Focus styles */
-        .channel-item:hover, .channel-item:focus {
-            background-color: var(--tertiary-bg);
-            color: var(--text-color); /* Highlight text on hover/focus */
-            outline: none; /* Remove default focus outline */
-        }
-        /* Selected channel styles */
-        .channel-item.selected {
-            background-color: var(--highlight-color);
-            font-weight: bold;
-            color: var(--primary-bg); /* Dark text on light background */
-        }
-        .channel-item.selected .channel-name {
-             color: var(--primary-bg); /* Ensure name color matches */
-        }
-        /* Slightly darker highlight on hover when selected */
-        .channel-item.selected:hover {
-            background-color: #1aa34a;
-        }
-
-        /* --- Favorite Button --- */
-        .favorite-btn {
-            position: absolute;
-            right: 10px; /* Position on the right */
-            top: 50%;
-            transform: translateY(-50%); /* Center vertically */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.6; /* Slightly transparent by default */
-            transition: opacity 0.2s ease;
-        }
-        .favorite-btn svg {
-            width: 18px;
-            height: 18px;
-            /* Fill color is handled by the path */
-        }
-        /* --- MODIFICATION: Define fill directly on the path --- */
-        .favorite-btn svg path {
-            fill: var(--text-secondary-color); /* Default star color (greyish) */
-            transition: fill 0.2s ease; /* Smooth color change */
-        }
-        /* Show favorite button more clearly on hover/focus or if it's already a favorite */
-        .channel-item:hover .favorite-btn,
-        .channel-item:focus .favorite-btn,
-        .channel-item .favorite-btn.is-favorite {
-            opacity: 1;
-        }
-
-        /* Style for the favorite state (applied by JS via class) */
-        .favorite-btn.is-favorite svg path { /* Target the path */
-            fill: var(--favorite-color); /* Yellow color */
-        }
-        /* Style favorite button when the channel item is selected */
-        .channel-item.selected .favorite-btn svg path { /* Target the path */
-            fill: var(--primary-bg); /* Dark color to contrast with highlight */
-            opacity: 0.8;
-        }
-        /* Ensure favorite color (yellow) overrides selected style if channel is both selected AND favorite */
-        .channel-item.selected .favorite-btn.is-favorite svg path { /* Target the path */
-            fill: var(--favorite-color); /* Yellow takes precedence */
-            opacity: 1;
-        }
-
-        /* --- Main Content (Player) --- */
-        .player-content {
-            flex-grow: 1; /* Take remaining horizontal space */
-            height: 100%;
-            display: flex;
-            flex-direction: column; /* Stack info/loader and video */
-            position: relative; /* For positioning info/loader */
-            background-color: #000; /* Black background for video area */
-            /* Subtle background pattern */
-            background-image: repeating-linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.02),
-                rgba(255, 255, 255, 0.02) 1px,
-                transparent 1px,
-                transparent 10px
-            );
-            /* *** NUEVO: Evitar el borde de enfoque amarillo en TVs *** */
-            outline: none !important;
-            border: none; /* Asegurar que no haya borde tampoco */
-        }
-        #videoPlayer {
-            width: 100%;
-            height: 100%;
-            flex-grow: 1; /* Video takes available space */
-            background-color: transparent; /* Let player-content background show */
-            display: block; /* Remove extra space below video */
-            object-fit: contain; /* Fit video within bounds, preserving aspect ratio */
-            outline: none; /* Remove focus outline specifically on video too */
-        }
-
-        /* --- Channel Info & Loader --- */
-        .channel-info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-            color: white;
-            padding: 10px 15px;
-            border-radius: var(--border-radius);
-            font-size: 1.1em;
-            z-index: 5; /* Above video, below sidebar */
-            opacity: 0; /* Hidden by default */
-            transition: opacity 0.5s ease; /* Fade in/out */
-            pointer-events: none; /* Don't block clicks on video */
-            max-width: 80%; /* Prevent overly long info text */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .channel-info.visible {
-            opacity: 1; /* Make visible */
-        }
-        .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); /* Center the loader */
-            border: 4px solid var(--tertiary-bg); /* Base circle */
-            border-top: 4px solid var(--highlight-color); /* Spinner color */
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            animation: spin 0.8s linear infinite; /* Rotation animation */
-            z-index: 1; /* Below channel info but above video */
-            display: none; /* Hidden by default */
-        }
-        /* Loader animation */
-        @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
+        .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+        #main-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 5px solid #f3f3f3; border-top: 5px solid #ff0000; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; z-index: 100; }
+        .dark #main-loader { border-color: #4b5563; border-top-color: #ff0000; }
+        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        .recommended-thumbnail { width: 100%; height: 100%; object-fit: cover; background-color: #e5e7eb; /* Gris claro por defecto */ color: #4b5563; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .dark .recommended-thumbnail { background-color: #374151; color: #9ca3af; } /* Gris oscuro en dark mode */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .dark ::-webkit-scrollbar-track { background: #1f2937; } /* gray-800 */
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; } /* gray-600 */
+        .dark ::-webkit-scrollbar-thumb:hover { background: #6b7280; } /* gray-500 */
+        #player-message { transition: opacity 0.5s ease-out; }
+        #favorite-btn.is-favorite i { font-weight: 900; color: #FACC15; } /* yellow-400 */
+        /* Estilo activo sidebar claro */
+        .sidebar-link.active { background-color: #f3f4f6; color: #DC2626; font-weight: 600; } /* gray-100, red-600 */
+        .sidebar-link.active i { color: #DC2626; }
+        /* Estilo activo sidebar oscuro */
+        .dark .sidebar-link.active { background-color: #374151; color: #f87171; } /* gray-700, red-400 */
+        .dark .sidebar-link.active i { color: #f87171; }
+        /* Estilo focus item canal claro */
+        .channel-item:focus { outline: 2px solid #3B82F6; outline-offset: -1px; background-color: #e5e7eb; } /* gray-200 */
+        .channel-item.selected { background-color: #d1d5db; } /* gray-300 */
+        .channel-item.selected:focus { background-color: #9ca3af; } /* gray-400 */
+        /* Estilo focus item canal oscuro */
+        .dark .channel-item { color: #d1d5db; } /* gray-300 texto por defecto */
+        .dark .channel-item:hover { background-color: #374151; } /* gray-700 */
+        .dark .channel-item:focus { background-color: #4b5563; } /* gray-600 */
+        .dark .channel-item.selected { background-color: #4b5563; color: #f9fafb; } /* gray-600, gray-50 */
+        .dark .channel-item.selected:focus { background-color: #52525b; } /* zinc-600 */
 
     </style>
 </head>
-<body>
-    <div class="player-container">
-        <div id="sidebar">
-             <div class="sidebar-header">
-                 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjtH1eFwNcBk9FvfM8ozeG6zjDtvJR2j2CdfNtfn8rj0JP9PRWR7zeL_ayD_dwmmuqOe8-sTp-TcOGCVsg5yhUNBO_PqRVI9gCMu3B1x2MQ1ZsitAg-1NKxQ70x3H-O9eehSCsQO6DzLPxcB_uZpfGmfziYNcXQ0JylvrGY1PE-sc9nJ76l2c62PG3Kcvs/w457-h136/JORGEDEZ-19-3-2025.png" alt="[Imagen de Logo Jorgedez]" class="app-logo" onerror="this.style.display='none'">
-                 <span id="channelCount" class="channel-count">0</span>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+    <div id="main-loader"></div>
+    <div id="load-error-message" class="text-center p-4 hidden text-red-600 dark:text-red-400"></div>
+
+    <div id="app-container" class="flex flex-col h-screen hidden">
+
+        <header class="bg-white dark:bg-gray-800 shadow-md dark:shadow-lg p-3 flex items-center justify-between sticky top-0 z-30 flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-4">
+                 <button id="menu-toggle" class="md:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"> <i class="fas fa-bars fa-lg"></i> </button>
+                 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjtH1eFwNcBk9FvfM8ozeG6zjDtvJR2j2CdfNtfn8rj0JP9PRWR7zeL_ayD_dwmmuqOe8-sTp-TcOGCVsg5yhUNBO_PqRVI9gCMu3B1x2MQ1ZsitAg-1NKxQ70x3H-O9eehSCsQO6DzLPxcB_uZpfGmfziYNcXQ0JylvrGY1PE-sc9nJ76l2c62PG3Kcvs/w457-h136/JORGEDEZ-19-3-2025.png" alt="Logo Principal" class="h-8 w-auto object-contain">
              </div>
-             <div class="channel-list-container">
-                 <ul id="channelList" class="channel-list" tabindex="-1">
-                     </ul>
+             <div class="flex-1 max-w-xl mx-4 hidden md:flex">
+                 <input type="text" placeholder="Buscar (no funcional)" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-full focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
+                 <button class="bg-gray-100 dark:bg-gray-700 px-4 py-2 border border-gray-300 dark:border-gray-600 border-l-0 rounded-r-full text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"> <i class="fas fa-search"></i> </button>
              </div>
-        </div>
-
-        <div id="playerContent" class="player-content" tabindex="-1"> <div id="channelInfo" class="channel-info"></div>
-            <div id="loader" class="loader"></div>
-            <video id="videoPlayer" controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture playsinline>
-                </video>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM References ---
-            const video = document.getElementById('videoPlayer');
-            const sidebar = document.getElementById('sidebar');
-            const channelListElement = document.getElementById('channelList');
-            const channelInfoElement = document.getElementById('channelInfo');
-            const loaderElement = document.getElementById('loader');
-            const playerContent = document.getElementById('playerContent');
-            const channelCountElement = document.getElementById('channelCount');
-            const channelListContainer = document.querySelector('.channel-list-container');
-
-            // --- M3U URL ---
-            // Replace this with the actual URL of your M3U playlist
-            const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
-
-            // --- State Variables ---
-            let channels = []; // Array to hold parsed channel objects
-            let currentChannelIndex = -1; // Logical index of the currently selected/playing channel
-            let hls = null; // HLS.js instance
-            let channelInfoTimeout; // Timeout ID for hiding the channel info message
-            let isSidebarFocused = false; // Flag to track if focus is within the sidebar list
-            let autoHideSidebarTimeoutId = null; // Timeout ID for auto-hiding the sidebar
-
-            // --- Favorites ---
-            let favoriteChannels = new Set(); // Set to store URLs of favorite channels
-            const FAVORITES_STORAGE_KEY = 'm3uPlayer_favorites_v2'; // Key for LocalStorage
-
-            // --- Last Channel ---
-            const LAST_CHANNEL_STORAGE_KEY = 'm3uPlayer_lastChannelIndex'; // Key for storing the last played channel index
-
-            // --- Volume Persistence ---
-            const VOLUME_STORAGE_KEY = 'm3uPlayer_volume'; // Key for storing volume
-            const MUTED_STORAGE_KEY = 'm3uPlayer_muted'; // Key for storing muted state
-
-            // --- HLS Initialization ---
-            if (Hls.isSupported()) {
-                console.log("HLS.js is supported.");
-                hls = new Hls({
-                    // Optional HLS.js configuration can go here
-                    // Example: enableWorker: true, lowLatencyMode: true
-                });
-                // Error handling for HLS streams
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    const currentChannelObject = channels.find(ch => ch.index === currentChannelIndex);
-                    handleError(currentChannelObject, data); // Pass channel info to error handler
-                });
-                hls.attachMedia(video); // Attach HLS.js to the video element
-            } else {
-                console.log("HLS.js is not supported. Native playback will be attempted for HLS streams.");
-            }
-
-            // --- LocalStorage Helper Functions ---
-            function saveToLocalStorage(key, value) {
-                try {
-                    localStorage.setItem(key, JSON.stringify(value));
-                } catch (e) {
-                    console.error(`LocalStorage Save Error (${key}):`, e);
-                }
-            }
-            function loadFromLocalStorage(key, defaultValue = null) {
-                try {
-                    const storedValue = localStorage.getItem(key);
-                    return storedValue !== null ? JSON.parse(storedValue) : defaultValue;
-                } catch (e) {
-                    console.error(`LocalStorage Load Error (${key}):`, e);
-                    return defaultValue; // Return default value on error
-                }
-            }
-
-            // --- Load Initial State from LocalStorage ---
-            function loadInitialState() {
-                // Load favorites
-                const savedFavorites = loadFromLocalStorage(FAVORITES_STORAGE_KEY, []);
-                favoriteChannels = new Set(savedFavorites); // Initialize the Set with saved URLs
-                console.log(`Favorites loaded: ${favoriteChannels.size}`);
-
-                // Load last played channel index
-                const savedIndex = loadFromLocalStorage(LAST_CHANNEL_STORAGE_KEY, -1);
-                // Check if the saved index is still valid within the current channel list
-                if (channels.some(ch => ch.index === savedIndex)) {
-                    currentChannelIndex = savedIndex;
-                    console.log(`Last channel index loaded: ${currentChannelIndex}`);
-                } else {
-                    // Fallback to the first channel if saved index is invalid or not set
-                    currentChannelIndex = channels.length > 0 ? channels[0].index : -1;
-                    console.log(`No valid last channel found or list changed. Falling back to index: ${currentChannelIndex}`);
-                }
-
-                // Load volume and muted state
-                const savedVolume = loadFromLocalStorage(VOLUME_STORAGE_KEY, 0.8); // Default volume 80%
-                const savedMuted = loadFromLocalStorage(MUTED_STORAGE_KEY, false); // Default not muted
-                video.volume = savedVolume;
-                video.muted = savedMuted;
-                console.log(`Volume loaded: ${video.volume}, Muted: ${video.muted}`);
-            }
-
-            // --- Fetch and Parse M3U Playlist ---
-            async function fetchAndParseM3U(url) {
-                showLoader(true); // Show loading indicator
-                try {
-                    // Append timestamp to URL to bypass cache if needed
-                    const response = await fetch(`${url}?t=${Date.now()}`);
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch M3U list (Status: ${response.status})`);
-                    }
-                    const m3uText = await response.text();
-                    channels = parseM3U(m3uText); // Parse the M3U text
-                    console.log(`Channels parsed: ${channels.length}`);
-
-                    // Update channel count display
-                    if (channelCountElement) {
-                        channelCountElement.textContent = channels.length;
-                    }
-
-                    loadInitialState(); // Load favorites, last channel, volume *after* channels are parsed
-                    renderChannelList(); // Render the list in the sidebar
-
-                    if (channels.length > 0) {
-                        // Display info for the initially selected channel (could be last played or first)
-                        const initialChannel = channels.find(ch => ch.index === currentChannelIndex);
-                        showChannelInfo(initialChannel?.name || "Select a channel");
-                        // Use requestAnimationFrame to ensure DOM is updated before focusing
-                        requestAnimationFrame(() => focusChannel(currentChannelIndex, true)); // Focus instantly
-                    } else {
-                        // Handle empty playlist
-                        channelListElement.innerHTML = `<li style="padding: 15px;">List is empty or failed to load.</li>`;
-                        showChannelInfo("No channels found");
-                    }
-                } catch (error) {
-                    console.error("Error fetching or parsing M3U:", error);
-                    channelListElement.innerHTML = `<li style="padding: 15px; color: #ff8a80;">Error loading list: ${error.message}</li>`;
-                    showChannelInfo("Error loading channels");
-                    if (channelCountElement) channelCountElement.textContent = 'X'; // Indicate error
-                } finally {
-                    showLoader(false); // Hide loading indicator
-                }
-            }
-
-            // --- Parse M3U Text Content ---
-            function parseM3U(text) {
-                const lines = text.split('\n'); // Split text into lines
-                const parsedChannels = [];
-                let currentChannel = {}; // Temporary object for the current channel being parsed
-                let channelIndex = 0; // Assign a unique, sequential index to each valid channel
-
-                for (const line of lines) {
-                    const trimmedLine = line.trim(); // Remove leading/trailing whitespace
-
-                    // Skip empty lines or the M3U header
-                    if (!trimmedLine || trimmedLine.startsWith('#EXTM3U')) continue;
-
-                    if (trimmedLine.startsWith('#EXTINF:')) {
-                        // Start of a new channel entry
-                        currentChannel = { name: 'Unknown Channel', url: '', logo: null, group: '', index: channelIndex }; // Initialize with defaults and index
-
-                        const infoLine = trimmedLine.substring(8); // Get the part after #EXTINF:
-                        const commaIndex = infoLine.lastIndexOf(','); // Find the last comma separating attributes and name
-
-                        if (commaIndex === -1) {
-                            console.warn("Malformed #EXTINF line (missing comma):", trimmedLine);
-                            currentChannel = {}; // Reset if malformed
-                            continue;
-                        }
-
-                        const attributesPart = infoLine.substring(0, commaIndex); // Part with tvg-logo, group-title etc.
-                        const namePart = infoLine.substring(commaIndex + 1); // Part after the last comma is the name
-
-                        currentChannel.name = namePart.trim() || 'Unknown Channel'; // Assign name
-
-                        // Extract attributes using regex (case-insensitive)
-                        const logoMatch = attributesPart.match(/tvg-logo="([^"]*)"/i);
-                        if (logoMatch && logoMatch[1]) currentChannel.logo = logoMatch[1];
-
-                        const groupMatch = attributesPart.match(/group-title="([^"]*)"/i);
-                        if (groupMatch && groupMatch[1]) currentChannel.group = groupMatch[1];
-
-                    } else if (trimmedLine && !trimmedLine.startsWith('#')) {
-                        // This line should be the URL for the previously parsed #EXTINF
-                        if (currentChannel.name !== 'Unknown Channel') { // Check if we have a valid channel object started
-                            currentChannel.url = trimmedLine;
-
-                            // Basic validation: Check if URL starts with http(s)
-                            if (currentChannel.url && (currentChannel.url.startsWith('http://') || currentChannel.url.startsWith('https://'))) {
-                                parsedChannels.push(currentChannel); // Add the complete channel object to the list
-                                channelIndex++; // Increment index for the next valid channel
-                            } else {
-                                console.warn(`Skipped channel "${currentChannel.name}" due to invalid or missing URL: ${currentChannel.url}`);
-                            }
-                            currentChannel = {}; // Reset for the next channel
-                        }
-                    }
-                }
-                return parsedChannels; // Return the array of parsed channel objects
-            }
-
-            // --- Render Channel List (with Favorites Sorting) ---
-            function renderChannelList() {
-                console.log("renderChannelList START");
-                // Store current scroll position to restore it after re-rendering
-                const currentScrollTop = channelListContainer.scrollTop;
-
-                // Sort channels: Favorites first, then by original index
-                channels.sort((a, b) => {
-                    const aIsFav = favoriteChannels.has(a.url);
-                    const bIsFav = favoriteChannels.has(b.url);
-                    if (aIsFav && !bIsFav) return -1; // a (fav) comes before b (not fav)
-                    if (!aIsFav && bIsFav) return 1; // b (fav) comes before a (not fav)
-                    return a.index - b.index; // Otherwise, sort by original index
-                });
-
-                // Clear the existing list
-                channelListElement.innerHTML = '';
-
-                // Create and append list items for each channel
-                channels.forEach((channel) => {
-                    const index = channel.index; // Use the persistent logical index
-                    const listItem = document.createElement('li');
-                    listItem.className = 'channel-item';
-                    listItem.dataset.index = index; // Store logical index in data attribute
-                    listItem.tabIndex = 0; // Make item focusable
-
-                    // Add channel logo if available
-                    if (channel.logo) {
-                        const logoImg = document.createElement('img');
-                        logoImg.src = channel.logo;
-                        logoImg.alt = ''; // Decorative image
-                        logoImg.className = 'channel-logo';
-                        logoImg.loading = 'lazy'; // Lazy load images for performance
-                        logoImg.onerror = (e) => { e.target.style.display = 'none'; }; // Hide broken images
-                        listItem.appendChild(logoImg);
-                    }
-
-                    // Add channel name
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'channel-name';
-                    nameSpan.textContent = channel.name || 'Unknown Channel';
-                    listItem.appendChild(nameSpan);
-
-                    // Add favorite button
-                    const favButton = document.createElement('button');
-                    favButton.className = 'favorite-btn';
-                    favButton.setAttribute('aria-label', 'Mark as favorite');
-                    favButton.dataset.channelUrl = channel.url; // Store URL for toggling
-                    // SVG Star Icon (Path fill color controlled by CSS)
-                    favButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
-
-                    // Add 'is-favorite' class if the channel URL is in the favorites Set
-                    if (favoriteChannels.has(channel.url)) {
-                        favButton.classList.add('is-favorite');
-                        favButton.setAttribute('aria-label', 'Remove from favorites');
-                        // console.log(`renderChannelList: Added 'is-favorite' class to button for channel index ${index} (${channel.name})`);
-                    }
-
-                    // Favorite button click listener
-                    favButton.addEventListener('click', (event) => {
-                        event.stopPropagation(); // Prevent channel selection when clicking the button
-                        console.log("Favorite button CLICKED.");
-                        toggleFavorite(channel.url, favButton); // Toggle the favorite status
-
-                        // --- Re-render and Re-focus ---
-                        // Get the logical index of the item whose favorite button was clicked
-                        const currentFocusedIndex = parseInt(listItem.dataset.index, 10);
-                        console.log("Calling renderChannelList after favorite button click");
-                        renderChannelList(); // Re-render the list to reflect sorting changes
-                        console.log("Requesting animation frame for focus after favorite button click");
-                        // Use rAF to ensure focus happens after the re-render
-                        requestAnimationFrame(() => {
-                            console.log(`rAF (after fav click): Calling focusChannel(${currentFocusedIndex})`);
-                            focusChannel(currentFocusedIndex); // Re-focus the same logical channel
-                        });
-                    });
-                    listItem.appendChild(favButton);
-
-                    // Channel item click listener
-                    listItem.addEventListener('click', () => selectAndPlayChannel(index));
-
-                    // Focus/Blur listeners for keyboard navigation state
-                    listItem.addEventListener('focus', () => isSidebarFocused = true);
-                    listItem.addEventListener('blur', () => isSidebarFocused = false);
-
-                    channelListElement.appendChild(listItem); // Add the item to the list
-                });
-
-                // Restore scroll position after re-rendering
-                channelListContainer.scrollTop = currentScrollTop;
-
-                console.log("renderChannelList END");
-            }
-
-
-            // --- Favorite Logic ---
-            function toggleFavorite(channelUrl, buttonElement) { // buttonElement is the <button>
-                console.log(`Toggling favorite for: ${channelUrl}. Current state: ${favoriteChannels.has(channelUrl)}`);
-                const channelName = channels.find(ch => ch.url === channelUrl)?.name || 'Channel';
-                let isNowFavorite; // Variable to store the new state
-
-                if (favoriteChannels.has(channelUrl)) {
-                    favoriteChannels.delete(channelUrl);
-                    isNowFavorite = false; // State after toggle
-                    console.log(`Favorite removed: ${channelUrl}`);
-                    showChannelInfo(`"${channelName}" removed from Favorites`);
-                    // Update aria-label (though it will be reset on re-render)
-                    // buttonElement.setAttribute('aria-label', 'Mark as favorite');
-                } else {
-                    favoriteChannels.add(channelUrl);
-                    isNowFavorite = true; // State after toggle
-                    console.log(`Favorite added: ${channelUrl}`);
-                    showChannelInfo(`"${channelName}" added to Favorites`);
-                    // Update aria-label (though it will be reset on re-render)
-                    // buttonElement.setAttribute('aria-label', 'Remove from favorites');
-                }
-
-                // --- Direct Style Manipulation REMOVED ---
-                // CSS now handles the visual state based on the 'is-favorite' class,
-                // which is applied during the renderChannelList function.
-                // We no longer need to directly manipulate the button's class here.
-                // buttonElement.classList.toggle('is-favorite', isNowFavorite);
-
-                console.log(`Favorite state after toggle: ${isNowFavorite}. Saving to LS.`);
-                saveToLocalStorage(FAVORITES_STORAGE_KEY, Array.from(favoriteChannels)); // Save the updated Set
-
-                // Note: renderChannelList() is called *after* this function returns
-                // in the event listener (click or keydown) that called toggleFavorite.
-            }
-
-
-            // --- Video Playback ---
-            function playChannel(index) {
-                console.log(`Attempting to play channel with logical index: ${index}`);
-                const channel = channels.find(ch => ch.index === index); // Find channel by logical index
-
-                if (!channel) {
-                    console.warn(`Channel with logical index ${index} not found.`);
-                    showChannelInfo("Error: Channel not found");
-                    return;
-                }
-
-                // Update state and save last played channel
-                currentChannelIndex = index;
-                saveToLocalStorage(LAST_CHANNEL_STORAGE_KEY, currentChannelIndex);
-
-                showLoader(true); // Show spinner
-                video.style.opacity = 0.5; // Dim video slightly while loading
-
-                console.log(`Playing [${index}]: ${channel.name} (${channel.url})`);
-                showChannelInfo(channel.name); // Display channel name
-
-                video.pause(); // Pause current playback if any
-                clearAutoHideTimer(); // Stop sidebar auto-hide timer
-
-                const videoUrl = channel.url;
-                const isHlsStream = videoUrl.toLowerCase().endsWith('.m3u8'); // Check if it's an HLS stream
-
-                try {
-                    if (isHlsStream) {
-                        if (hls) { // Use HLS.js if supported and initialized
-                            console.log("Using HLS.js for playback");
-                            hls.stopLoad(); // Stop previous load if any
-                            hls.detachMedia(); // Detach from video element temporarily
-                            hls.loadSource(videoUrl); // Load the new source
-                            hls.attachMedia(video); // Re-attach to video element
-                            // Play when manifest is parsed
-                            hls.once(Hls.Events.MANIFEST_PARSED, () => {
-                                video.play().catch(handlePlayError);
-                            });
-                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) { // Fallback to native HLS support
-                            console.log("Using native HLS playback");
-                            // Resetting src is important for some browsers to switch streams
-                            video.removeAttribute('src');
-                            video.src = '';
-                            video.load(); // Important: call load() after clearing src
-                            video.src = videoUrl;
-                            // Play when metadata is loaded
-                            video.addEventListener('loadedmetadata', () => {
-                                video.play().catch(handlePlayError);
-                            }, { once: true });
-                            // Add specific error handler for native playback
-                            video.addEventListener('error', (e) => handleError(channel, { type: 'Native HLS Error', details: video.error?.message || 'Unknown Error' }), { once: true });
-                        } else {
-                            // Neither HLS.js nor native HLS is supported
-                            throw new Error('HLS playback is not supported in this browser.');
-                        }
-                    } else { // For non-HLS streams (e.g., MP4, WebM)
-                        console.log("Using direct video playback");
-                        if (hls) { // Detach HLS.js if it was attached
-                            hls.stopLoad();
-                            hls.detachMedia();
-                        }
-                        // Resetting src for direct playback too
-                        video.removeAttribute('src');
-                        video.src = '';
-                        video.load();
-                        video.src = videoUrl;
-                        video.play().catch(handlePlayError);
-                        // Add error handler for direct playback
-                        video.addEventListener('error', (e) => handleError(channel, { type: 'Direct Playback Error', details: video.error?.message || 'Unknown Error' }), { once: true });
-                    }
-                } catch (error) {
-                    console.error("Error setting up video source:", error);
-                    handleError(channel, { type: 'Setup Error', details: error.message, fatal: true });
-                }
-
-                // Add 'playing' listener to hide loader and restore opacity
-                video.removeEventListener('playing', onPlaying); // Remove previous listener if any
-                video.addEventListener('playing', onPlaying, { once: true }); // Use once to ensure it only fires once per play attempt
-            }
-
-            // Handler for when video starts playing successfully
-            function onPlaying() {
-                console.log("Video 'playing' event triggered.");
-                showLoader(false); // Hide spinner
-                video.style.opacity = 1; // Restore full opacity
-                startAutoHideTimer(); // Start timer to hide sidebar
-            }
-
-            // Handler for video play() promise rejection
-            function handlePlayError(e) {
-                console.error("Error starting playback:", e);
-                showLoader(false); // Hide spinner
-                video.style.opacity = 1; // Restore opacity
-                showChannelInfo(`Playback Error: ${e.name}`); // Show error info
-                clearAutoHideTimer(); // Stop sidebar timer
-            }
-
-
-            // --- Handle General Errors (HLS.js, Native, Setup) ---
-            function handleError(channel, errorData) {
-                 const channelName = channel ? channel.name : 'the stream';
-                 const channelIndex = channel ? channel.index : 'N/A';
-                 console.error(`Error on channel "${channelName}" [Index: ${channelIndex}]:`, errorData);
-
-                 showLoader(false); // Ensure loader is hidden
-                 video.style.opacity = 1; // Ensure video is visible
-
-                 // Construct a user-friendly error message
-                 let errorMsg = `Error playing ${channelName}`;
-                 if (errorData) {
-                     if (errorData.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                         errorMsg += ` (Network Error: ${errorData.details})`;
-                     } else if (errorData.type === Hls.ErrorTypes.MEDIA_ERROR) {
-                         errorMsg += ` (Media Error: ${errorData.details})`;
-                     } else if (errorData.details) {
-                         // General details if available
-                         errorMsg += ` (${errorData.details})`;
-                     } else if (typeof errorData === 'string') {
-                         // If errorData is just a string
-                         errorMsg += ` (${errorData})`;
-                     }
-                 }
-
-                 // Check if the error is marked as fatal (stream likely dead)
-                 if (errorData?.fatal) {
-                     errorMsg += " - Stream may be unavailable.";
-                     console.warn("Fatal error occurred. Stopping playback attempts for this source.");
-                     // Stop HLS.js loading if it was the source of the error
-                     if (hls && hls.media === video && channel && hls.url === channel.url) {
-                         hls.stopLoad();
-                     }
-                     // Consider stopping native playback too if applicable, though harder to track source
-                 }
-
-                 showChannelInfo(errorMsg + ". Try another channel."); // Display the error
-                 clearAutoHideTimer(); // Stop sidebar auto-hide timer
+             <div class="flex items-center space-x-1"> <button id="theme-toggle-btn" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Cambiar tema">
+                     <i class="fas fa-moon"></i> </button>
+                 <button class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"> <i class="fas fa-video fa-lg"></i> </button>
+                 <button class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"> <i class="fas fa-bell fa-lg"></i> </button>
+                 <button class="w-8 h-8 rounded-full bg-gray-400 dark:bg-gray-600 text-white flex-shrink-0 flex items-center justify-center ml-1"> J </button> </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden"> <aside id="sidebar" class="w-60 bg-white dark:bg-gray-800 h-full overflow-y-auto p-4 space-y-6 transition-transform duration-300 ease-in-out transform md:translate-x-0 -translate-x-full md:relative fixed z-40 shadow-lg dark:shadow-none md:shadow-none flex-shrink-0 border-r border-gray-200 dark:border-gray-700">
+                 <nav class="space-y-2">
+                     <a href="#" id="home-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-home fa-fw text-gray-500 dark:text-gray-400"></i> <span>Inicio</span> </a>
+                     <a href="#" id="favorites-link" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-star fa-fw text-gray-500 dark:text-gray-400"></i> <span>Favoritos</span> </a>
+                     <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-photo-video fa-fw text-gray-500 dark:text-gray-400"></i> <span>Suscripciones</span> </a> </nav> <hr class="border-gray-200 dark:border-gray-700">
+                 <nav class="space-y-2"> <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-3">Biblioteca</h3> <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-history fa-fw text-gray-500 dark:text-gray-400"></i> <span>Historial</span> </a> <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-clock fa-fw text-gray-500 dark:text-gray-400"></i> <span>Ver más tarde</span> </a> <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-thumbs-up fa-fw text-gray-500 dark:text-gray-400"></i> <span>Vídeos que me gustan</span> </a> </nav> <hr class="border-gray-200 dark:border-gray-700"> <div class="space-y-2"> <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase px-3">Categorías</h3> <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-music fa-fw text-gray-500 dark:text-gray-400"></i> <span>Música</span> </a> <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-gamepad fa-fw text-gray-500 dark:text-gray-400"></i> <span>Videojuegos</span> </a> <a href="#" class="sidebar-link flex items-center space-x-4 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"> <i class="fas fa-newspaper fa-fw text-gray-500 dark:text-gray-400"></i> <span>Noticias</span> </a> </div>
+            </aside>
+
+            <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-30 hidden md:hidden"></div>
+
+            <main id="content-area" class="flex-1 flex flex-col md:flex-row overflow-y-auto overflow-x-hidden p-4 md:p-6 bg-gray-100 dark:bg-gray-900 transition-all duration-300 ease-in-out min-w-0">
+
+                 <div class="flex-1 md:pr-6 mb-6 md:mb-0 min-w-0">
+                    <div id="video-player-container" class="relative bg-black aspect-video rounded-lg overflow-hidden mb-4 shadow-lg group">
+                        <video id="video-player" class="w-full h-full" preload="metadata" playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture> <track label="Español" kind="subtitles" srclang="es" src="subtitulos_es.vtt"> Tu navegador no soporta la etiqueta de vídeo. </video>
+                        <div id="player-loader" class="absolute inset-0 flex items-center justify-center bg-black/50 hidden"> <div class="border-4 border-gray-500 border-t-white rounded-full w-12 h-12 animate-spin"></div> </div>
+                        <div id="player-message" class="absolute top-4 left-4 right-4 p-3 rounded text-white text-sm z-10 text-center pointer-events-none hidden"></div>
+                        <div id="video-controls" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300">
+                             <input type="range" id="progress-bar" value="0" step="0.1" class="w-full h-1.5 mb-2 cursor-pointer appearance-none">
+                             <div class="flex items-center justify-between text-white">
+                                <div class="flex items-center space-x-3"> <button id="play-pause-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Reproducir/Pausar"> <i class="fas fa-play"></i> </button> <span id="time-display" class="text-xs font-mono">00:00 / 00:00</span> </div>
+                                <div class="flex items-center space-x-2"> <button id="speed-btn" class="text-xs font-semibold focus:outline-none px-2 py-1 rounded hover:bg-white/20" aria-label="Velocidad de reproducción">1x</button> <button id="volume-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Silenciar/Activar Sonido"> <i class="fas fa-volume-up"></i> </button> <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-20 h-1.5 cursor-pointer appearance-none hidden md:inline-block" aria-label="Control de volumen"> <button id="fullscreen-btn" class="text-xl focus:outline-none w-8 h-8 flex items-center justify-center" aria-label="Pantalla Completa"> <i class="fas fa-expand"></i> </button> </div>
+                            </div>
+                        </div> </div><div class="mb-4"> <h1 id="video-title" class="text-xl md:text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">Cargando lista...</h1> </div>
+
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b border-gray-200 dark:border-gray-700 gap-4">
+                         <div class="flex items-center space-x-3 min-w-0 flex-grow">
+                             <div id="channel-logo-container" class="w-10 h-10 rounded-full bg-gray-500 text-white flex items-center justify-center text-xl overflow-hidden flex-shrink-0"> <i class="fas fa-tv"></i> <img id="channel-logo-img" src="" alt="" class="w-full h-full object-contain hidden"> </div>
+                             <div class="flex-1 min-w-0 mr-4"> <div id="channel-name" class="font-semibold truncate text-gray-900 dark:text-gray-100">Nombre del Canal</div> <div id="subscriber-count" class="text-xs text-gray-500 dark:text-gray-400 truncate">Grupo/Subtítulo</div> </div>
+                             <button class="bg-black dark:bg-gray-700 text-white dark:text-gray-200 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-600 flex-shrink-0">Suscribirse</button>
+                         </div>
+                         <div class="flex items-center space-x-1 text-gray-700 dark:text-gray-300 flex-shrink-0">
+                             <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden"> <button id="like-btn" class="flex items-center space-x-1 px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300" aria-label="Me gusta"> <i class="far fa-thumbs-up"></i> <span id="like-count" class="text-sm">--</span> </button> <div class="border-l border-gray-300 dark:border-gray-600 h-6 self-center"></div> <button id="dislike-btn" class="flex items-center px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300" aria-label="No me gusta"> <i class="far fa-thumbs-down"></i> </button> </div>
+                             <button class="flex items-center space-x-1 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300" aria-label="Compartir"> <i class="fas fa-share"></i> <span class="hidden lg:inline">Compartir</span> </button>
+                             <button class="flex items-center space-x-1 px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none text-gray-700 dark:text-gray-300" aria-label="Guardar"> <i class="fas fa-plus-square"></i> <span class="hidden lg:inline">Guardar</span> </button>
+                             <button id="favorite-btn" class="flex items-center px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none ml-1" aria-label="Añadir a Favoritos"> <i class="far fa-star text-gray-600 dark:text-gray-400"></i> </button>
+                         </div>
+                    </div> <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg mb-6 text-sm text-gray-700 dark:text-gray-300"> <p id="video-description">Selecciona un canal de la lista de recomendados para empezar.</p> </div>
+
+                    <div id="comments-section" class="mb-6">
+                        <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100"><span id="comment-count">0</span> Comentarios</h2>
+                        <div class="flex items-start space-x-3 mb-6"> <div class="w-10 h-10 rounded-full bg-gray-400 dark:bg-gray-600 flex-shrink-0 flex items-center justify-center text-white"> <i class="fas fa-user"></i> </div> <input type="text" placeholder="Añade un comentario..." class="w-full border-b-2 border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-gray-400 focus:outline-none py-1 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"> </div>
+                        <div id="comment-list" class="space-y-5"> </div>
+                    </div> </div> <aside class="w-full md:w-96 flex-shrink-0">
+                    <h2 id="channel-list-title" class="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">Canales Disponibles</h2>
+                    <div id="channel-list-container" tabindex="-1" class="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto focus:outline-none">
+                        <p id="channel-list-placeholder" class="text-gray-500 dark:text-gray-400">Cargando canales...</p>
+                        </div>
+                </aside> </main> </div> </div> <script>
+        // --- Elementos del DOM ---
+        const mainLoader = document.getElementById('main-loader');
+        const appContainer = document.getElementById('app-container');
+        const videoPlayerContainer = document.getElementById('video-player-container');
+        const videoPlayer = document.getElementById('video-player');
+        const playerLoader = document.getElementById('player-loader');
+        const playerMessage = document.getElementById('player-message');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playPauseIcon = playPauseBtn.querySelector('i');
+        const progressBar = document.getElementById('progress-bar');
+        const timeDisplay = document.getElementById('time-display');
+        const volumeBtn = document.getElementById('volume-btn');
+        const volumeIcon = volumeBtn.querySelector('i');
+        const volumeSlider = document.getElementById('volume-slider');
+        const speedBtn = document.getElementById('speed-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const videoControls = document.getElementById('video-controls');
+        const videoTitle = document.getElementById('video-title');
+        const channelNameElement = document.getElementById('channel-name');
+        const subscriberCountElement = document.getElementById('subscriber-count');
+        const channelLogoContainer = document.getElementById('channel-logo-container');
+        const channelLogoImg = document.getElementById('channel-logo-img');
+        const channelLogoIcon = channelLogoContainer.querySelector('i');
+        const videoDescription = document.getElementById('video-description');
+        const channelListContainer = document.getElementById('channel-list-container');
+        const channelListPlaceholder = document.getElementById('channel-list-placeholder');
+        const channelListTitle = document.getElementById('channel-list-title');
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const commentsSection = document.getElementById('comments-section');
+        const commentCountElement = document.getElementById('comment-count');
+        const commentListContainerJS = document.getElementById('comment-list');
+        const homeLink = document.getElementById('home-link');
+        const favoritesLink = document.getElementById('favorites-link');
+        const favoriteBtn = document.getElementById('favorite-btn');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const htmlElement = document.documentElement;
+        const loadErrorMessageContainer = document.getElementById('load-error-message');
+
+
+        // --- URL del M3U ---
+        const m3uUrl = 'https://raw.githubusercontent.com/sejo48/chanejorgedez/refs/heads/main/listaoficial.m3u';
+
+        // --- Estado de la Aplicación ---
+        let hls = null;
+        let channels = [];
+        let currentChannelIndex = -1;
+        const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+        let currentSpeedIndex = 2;
+        let favoriteChannelUrls = new Set();
+        const FAVORITES_KEY = 'youtubeClone_favorites';
+        let currentView = 'all';
+        let isDarkMode = false;
+        const THEME_KEY = 'youtubeClone_theme';
+
+
+        // --- Datos de Comentarios Simulados ---
+        const sampleComments = [ /* ... sin cambios ... */ { author: "Usuario Alfa", timestamp: "Hace 15 minutos", text: "¡Excelente transmisión! Se ve muy nítido.", likes: 12, avatarColor: "#3B82F6" }, { author: "Beta Tester", timestamp: "Hace 1 hora", text: "¿Alguien sabe si pasarán el partido más tarde?", likes: 3, avatarColor: "#10B981" }, { author: "Comentarista Casual", timestamp: "Hace 3 horas", text: "Me encanta este canal, siempre buena programación.", likes: 8, avatarColor: "#F59E0B" }, { author: "Noctámbulo", timestamp: "Hace 5 horas", text: "Perfecto para verlo de madrugada.", likes: 2, avatarColor: "#6366F1" }, { author: "Observador", timestamp: "Hace 1 día", text: "La calidad de imagen es bastante buena comparada con otras opciones.", likes: 5, avatarColor: "#EC4899" } ];
+
+        // --- Funciones Tema Oscuro/Claro ---
+        function loadTheme() { const savedTheme = localStorage.getItem(THEME_KEY); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; if (savedTheme === 'dark' || (!savedTheme && prefersDark)) { isDarkMode = true; } else { isDarkMode = false; } applyTheme(); console.log(`Tema cargado: ${isDarkMode ? 'Oscuro' : 'Claro'}`); }
+        function saveTheme() { localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light'); }
+        function applyTheme() { htmlElement.classList.toggle('dark', isDarkMode); if (themeToggleBtn) { themeToggleBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; themeToggleBtn.setAttribute('aria-label', isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'); } }
+        function toggleTheme() { isDarkMode = !isDarkMode; applyTheme(); saveTheme(); console.log(`Tema cambiado a: ${isDarkMode ? 'Oscuro' : 'Claro'}`); }
+
+        // --- Funciones Favoritos ---
+        function loadFavorites() { const storedFavorites = localStorage.getItem(FAVORITES_KEY); if (storedFavorites) { try { const parsedFavorites = JSON.parse(storedFavorites); if (Array.isArray(parsedFavorites)) { favoriteChannelUrls = new Set(parsedFavorites); console.log(`Favoritos cargados: ${favoriteChannelUrls.size}`); } else { console.warn("Los favoritos guardados no son un array, iniciando vacío."); favoriteChannelUrls = new Set(); } } catch (e) { console.error("Error al parsear favoritos de localStorage:", e); favoriteChannelUrls = new Set(); } } else { favoriteChannelUrls = new Set(); } }
+        function saveFavorites() { try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(favoriteChannelUrls))); } catch (e) { console.error("Error al guardar favoritos en localStorage:", e); } }
+        function isFavorite(channelUrl) { return favoriteChannelUrls.has(channelUrl); }
+        function toggleFavorite() { if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) return; const currentChannel = channels[currentChannelIndex]; const url = currentChannel.url; if (isFavorite(url)) { favoriteChannelUrls.delete(url); console.log(`Canal "${currentChannel.name}" eliminado de favoritos.`); showPlayerMessage(`"${currentChannel.name}" eliminado de Favoritos`); } else { favoriteChannelUrls.add(url); console.log(`Canal "${currentChannel.name}" añadido a favoritos.`); showPlayerMessage(`"${currentChannel.name}" añadido a Favoritos`); } saveFavorites(); updateFavoriteButtonState(); if (currentView === 'favorites') { renderChannelList(); } }
+        function updateFavoriteButtonState() { if (currentChannelIndex < 0 || currentChannelIndex >= channels.length) { favoriteBtn.classList.remove('is-favorite'); favoriteBtn.querySelector('i').classList.remove('fas', 'text-yellow-400'); favoriteBtn.querySelector('i').classList.add('far', 'text-gray-600', 'dark:text-gray-400'); favoriteBtn.setAttribute('aria-label', 'Añadir a Favoritos'); favoriteBtn.disabled = true; return; } favoriteBtn.disabled = false; const currentChannel = channels[currentChannelIndex]; const isFav = isFavorite(currentChannel.url); favoriteBtn.classList.toggle('is-favorite', isFav); favoriteBtn.querySelector('i').classList.toggle('fas', isFav); favoriteBtn.querySelector('i').classList.toggle('far', !isFav); favoriteBtn.querySelector('i').classList.toggle('text-yellow-400', isFav); favoriteBtn.querySelector('i').classList.toggle('text-gray-600', !isFav); favoriteBtn.querySelector('i').classList.toggle('dark:text-gray-400', !isFav); favoriteBtn.setAttribute('aria-label', isFav ? 'Quitar de Favoritos' : 'Añadir a Favoritos'); }
+
+        // --- Inicialización HLS.js ---
+        function initializeHls() { if (Hls.isSupported()) { console.log("HLS.js es soportado."); hls = new Hls({ manifestLoadingTimeOut: 15000, levelLoadingTimeOut: 15000 }); hls.attachMedia(videoPlayer); hls.on(Hls.Events.ERROR, handleHlsError); hls.on(Hls.Events.MANIFEST_PARSED, () => console.log("Manifiesto HLS parseado.")); } else { console.warn("HLS.js no es soportado."); } }
+        // --- Parseo del M3U ---
+        function parseM3U(text) { const lines = text.split('\n'); const parsedChannels = []; let currentChannel = null; let channelIdCounter = 0; for (const line of lines) { const trimmedLine = line.trim(); if (trimmedLine.startsWith('#EXTINF:')) { currentChannel = { id: channelIdCounter, name: 'Unknown Channel', url: '', logo: null, group: '' }; const commaIndex = trimmedLine.lastIndexOf(','); if (commaIndex !== -1) { currentChannel.name = trimmedLine.substring(commaIndex + 1).trim() || 'Unknown Channel'; const attributesPart = trimmedLine.substring(8, commaIndex); const logoMatch = attributesPart.match(/tvg-logo="([^"]*)"/i); if (logoMatch && logoMatch[1]) currentChannel.logo = logoMatch[1]; const groupMatch = attributesPart.match(/group-title="([^"]*)"/i); if (groupMatch && groupMatch[1]) currentChannel.group = groupMatch[1]; } } else if (currentChannel && !trimmedLine.startsWith('#') && trimmedLine) { if (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://')) { currentChannel.url = trimmedLine; parsedChannels.push(currentChannel); channelIdCounter++; } else { console.warn(`URL inválida o faltante para el canal "${currentChannel.name}": ${trimmedLine}`); } currentChannel = null; } } console.log(`Canales parseados: ${parsedChannels.length}`); return parsedChannels; }
+        // --- Carga y Parseo del M3U (Manejo de Errores Mejorado) ---
+        async function fetchAndLoadM3U(url) { mainLoader.style.display = 'block'; appContainer.classList.add('hidden'); loadErrorMessageContainer.classList.add('hidden'); let success = false; try { loadFavorites(); console.log(`Fetching M3U from: ${url}`); const response = await fetch(`${url}?t=${Date.now()}`); console.log(`M3U Fetch Response Status: ${response.status}`); if (!response.ok) { throw new Error(`Error al descargar M3U: ${response.status} ${response.statusText}`); } const m3uText = await response.text(); if (!m3uText) { throw new Error("El archivo M3U está vacío."); } console.log("M3U texto recibido, parseando..."); channels = parseM3U(m3uText); console.log(`Parseo completo, ${channels.length} canales encontrados.`); if (channels.length > 0) { renderChannelList(); videoTitle.textContent = "Selecciona un Canal"; videoDescription.textContent = "Elige un canal de la lista de la derecha."; channelListPlaceholder.style.display = 'none'; renderComments(sampleComments); updateSidebarActiveLink('home'); success = true; } else { console.warn("La lista M3U está vacía o no se pudo parsear."); channelListPlaceholder.textContent = "Lista de canales vacía o inválida."; channelListPlaceholder.style.display = 'block'; success = true; } if (success) { appContainer.classList.remove('hidden'); console.log("App container displayed."); } } catch (error) { console.error("Error detallado al cargar M3U:", error); loadErrorMessageContainer.innerHTML = `<div class="text-red-500 dark:text-red-400"><h1 class="text-xl font-bold mb-2">Error al Cargar</h1><p>${error.message}</p><p>Por favor, revisa la URL del M3U o tu conexión.</p></div>`; loadErrorMessageContainer.classList.remove('hidden'); } finally { mainLoader.style.display = 'none'; console.log("Loader hidden."); } }
+
+        // --- Renderizar Canales (Todos o Favoritos) ---
+        function renderChannelList() { channelListContainer.innerHTML = ''; const channelsToDisplay = currentView === 'favorites' ? channels.filter(channel => isFavorite(channel.url)) : channels; channelListTitle.textContent = currentView === 'favorites' ? 'Canales Favoritos' : 'Canales Disponibles'; if (channelsToDisplay.length === 0) { channelListPlaceholder.textContent = currentView === 'favorites' ? "No tienes canales favoritos marcados." : "No hay canales disponibles."; channelListPlaceholder.style.display = 'block'; return; } channelListPlaceholder.style.display = 'none'; channelsToDisplay.forEach((channel) => { const originalIndex = channels.findIndex(c => c.id === channel.id); const videoElement = document.createElement('div'); videoElement.classList.add('flex', 'space-x-3', 'cursor-pointer', 'channel-item', 'p-2', 'rounded-lg', 'hover:bg-gray-200', 'dark:hover:bg-gray-700', 'items-center'); videoElement.setAttribute('role', 'button'); videoElement.setAttribute('tabindex', '0'); videoElement.setAttribute('aria-label', `Reproducir ${channel.name}`); videoElement.dataset.index = originalIndex; const thumbContainer = document.createElement('div'); thumbContainer.classList.add('w-24', 'h-16', 'flex-shrink-0', 'relative', 'bg-black/10', 'dark:bg-white/10', 'rounded', 'overflow-hidden', 'flex', 'items-center', 'justify-center'); const logoImg = document.createElement('img'); logoImg.alt = ""; logoImg.classList.add('recommended-thumbnail'); logoImg.loading = 'lazy'; if (channel.logo) { logoImg.src = channel.logo; logoImg.onerror = () => { thumbContainer.innerHTML = '<i class="fas fa-tv text-3xl text-gray-500 dark:text-gray-400"></i>'; thumbContainer.classList.add('bg-gray-700'); }; thumbContainer.appendChild(logoImg); } else { thumbContainer.innerHTML = '<i class="fas fa-tv text-3xl text-gray-500 dark:text-gray-400"></i>'; thumbContainer.classList.add('bg-gray-700'); } const infoDiv = document.createElement('div'); infoDiv.classList.add('flex-1', 'overflow-hidden'); infoDiv.innerHTML = `<h3 class="text-sm font-semibold group-hover:text-red-600 dark:group-hover:text-red-400 line-clamp-2 text-gray-800 dark:text-gray-200">${channel.name}</h3><p class="text-xs text-gray-500 dark:text-gray-400 truncate">${channel.group || 'General'}</p>`; videoElement.appendChild(thumbContainer); videoElement.appendChild(infoDiv); const loadHandler = () => loadVideo(originalIndex); videoElement.addEventListener('click', loadHandler); channelListContainer.appendChild(videoElement); }); highlightChannelInList(currentChannelIndex); }
+        // --- Cargar y Reproducir un Vídeo/Canal ---
+        function loadVideo(index) { if (index < 0 || index >= channels.length) { console.error(`Índice de canal inválido: ${index}`); return; } currentChannelIndex = index; const channel = channels[index]; const videoUrl = channel.url; console.log(`Cargando canal [${index}]: ${channel.name} (${videoUrl})`); playerLoader.classList.remove('hidden'); videoPlayer.style.opacity = '0.5'; if (hls) { hls.stopLoad(); hls.detachMedia(); } videoPlayer.removeAttribute('src'); videoPlayer.load(); videoTitle.textContent = channel.name; videoDescription.textContent = `Reproduciendo: ${channel.name}${channel.group ? ' (' + channel.group + ')' : ''}`; channelNameElement.textContent = channel.name; subscriberCountElement.textContent = channel.group || ''; channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoContainer.classList.remove('bg-gray-500', 'bg-blue-500'); if (channel.logo) { channelLogoImg.src = channel.logo; channelLogoImg.classList.remove('hidden'); channelLogoIcon.classList.add('hidden'); channelLogoImg.onerror = () => { channelLogoImg.classList.add('hidden'); channelLogoIcon.classList.remove('hidden'); channelLogoContainer.classList.add('bg-gray-500'); } } else { channelLogoContainer.classList.add('bg-blue-500'); } highlightChannelInList(index); currentSpeedIndex = playbackRates.indexOf(1); setPlaybackSpeed(1); updateFavoriteButtonState(); try { if (videoUrl.toLowerCase().endsWith('.m3u8')) { if (hls) { console.log("Usando HLS.js para reproducir."); hls.loadSource(videoUrl); hls.attachMedia(videoPlayer); } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) { console.log("Usando reproducción HLS nativa."); videoPlayer.src = videoUrl; } else { throw new Error('HLS no soportado por el navegador.'); } } else { console.log("Usando reproducción directa."); if (hls) hls.detachMedia(); videoPlayer.src = videoUrl; } videoPlayer.play().catch(e => { console.warn("Fallo al auto-reproducir:", e.message, "- Se requiere interacción del usuario."); }); } catch (error) { console.error("Error al configurar la fuente del vídeo:", error); handlePlaybackError(error); } }
+        // --- Resaltar Canal en la Lista Actual (Derecha) ---
+         function highlightChannelInList(selectedIndex) { const items = channelListContainer.querySelectorAll('.channel-item'); let elementToFocus = null; items.forEach((item) => { const itemIndex = parseInt(item.dataset.index); const isSelected = itemIndex === selectedIndex; item.classList.toggle('bg-gray-300', isSelected); item.classList.toggle('dark:bg-gray-600', isSelected); if (isSelected) { elementToFocus = item; } }); if(elementToFocus) { const containerRect = channelListContainer.getBoundingClientRect(); const elementRect = elementToFocus.getBoundingClientRect(); if (elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom) { elementToFocus.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } } }
+        // --- Manejador de Errores HLS.js ---
+        function handleHlsError(event, data) { console.error('Error de HLS.js:', data); if (data.fatal) { switch(data.type) { case Hls.ErrorTypes.NETWORK_ERROR: console.warn("Error de red HLS - Intentando recuperar..."); showPlayerMessage("Error de red, intentando reconectar..."); setTimeout(() => {if(hls) hls.loadSource(hls.url)}, 3000); break; case Hls.ErrorTypes.MEDIA_ERROR: console.warn("Error de media HLS - Intentando recuperar..."); showPlayerMessage("Error de stream, intentando recuperar..."); if(hls) hls.recoverMediaError(); break; default: console.error("Error HLS fatal no recuperable."); handlePlaybackError(new Error(`Error HLS: ${data.details || data.type}`)); if (hls) hls.destroy(); initializeHls(); break; } } else { console.warn(`Error HLS no fatal: ${data.details || data.type}`); } }
+        // --- Manejador de Errores de Reproducción General ---
+        function handlePlaybackError(error) { console.error("Error de reproducción:", error); playerLoader.classList.add('hidden'); videoPlayer.style.opacity = '1'; showPlayerMessage(`Error: ${error.message || 'No se pudo reproducir el canal.'}`, true); }
+        // --- Mostrar Mensaje sobre el Reproductor ---
+        function showPlayerMessage(message, isError = false) { playerMessage.textContent = message; playerMessage.classList.toggle('bg-red-600/80', isError); playerMessage.classList.toggle('bg-black/70', !isError); playerMessage.classList.remove('hidden'); if (playerMessage.timeoutId) clearTimeout(playerMessage.timeoutId); playerMessage.timeoutId = setTimeout(() => { playerMessage.classList.add('hidden'); }, 3000); }
+        // --- Renderizar Comentarios Simulados ---
+        function renderComments(commentsToRender) { if (!commentListContainerJS || !commentCountElement) return; commentListContainerJS.innerHTML = ''; if (!commentsToRender || commentsToRender.length === 0) { commentCountElement.textContent = '0'; return; } commentCountElement.textContent = commentsToRender.length.toLocaleString(); commentsToRender.forEach(comment => { const commentDiv = document.createElement('div'); commentDiv.classList.add('flex', 'items-start', 'space-x-3'); const avatarDiv = document.createElement('div'); avatarDiv.classList.add('w-10', 'h-10', 'rounded-full', 'flex-shrink-0', 'flex', 'items-center', 'justify-center', 'text-white', 'font-semibold'); avatarDiv.style.backgroundColor = comment.avatarColor || '#A0AEC0'; avatarDiv.textContent = comment.author.charAt(0).toUpperCase(); const contentDiv = document.createElement('div'); contentDiv.classList.add('flex-1'); const infoDiv = document.createElement('div'); infoDiv.classList.add('text-sm'); infoDiv.innerHTML = `<span class="font-semibold mr-2 text-gray-900 dark:text-gray-100">${comment.author}</span><span class="text-gray-500 dark:text-gray-400">${comment.timestamp}</span>`; const textP = document.createElement('p'); textP.classList.add('text-sm', 'mt-1', 'text-gray-900', 'dark:text-gray-100'); textP.textContent = comment.text; const actionsDiv = document.createElement('div'); actionsDiv.classList.add('flex', 'items-center', 'space-x-3', 'text-xs', 'text-gray-500', 'dark:text-gray-400', 'mt-2'); actionsDiv.innerHTML = `<button class="hover:text-black dark:hover:text-white focus:outline-none"><i class="far fa-thumbs-up"></i> ${comment.likes || 0}</button><button class="hover:text-black dark:hover:text-white focus:outline-none"><i class="far fa-thumbs-down"></i></button><button class="font-semibold hover:text-black dark:hover:text-white focus:outline-none uppercase">Responder</button>`; contentDiv.appendChild(infoDiv); contentDiv.appendChild(textP); contentDiv.appendChild(actionsDiv); commentDiv.appendChild(avatarDiv); commentDiv.appendChild(contentDiv); commentListContainerJS.appendChild(commentDiv); }); }
+        // --- Controles del Reproductor ---
+        function formatTime(time) { if (isNaN(time) || !isFinite(time)) return '00:00'; const minutes = Math.floor(time / 60); const seconds = Math.floor(time % 60); return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; }
+        function togglePlayPause() { if (videoPlayer.paused || videoPlayer.ended) { videoPlayer.play().catch(handlePlaybackError); } else { videoPlayer.pause(); } }
+        function updatePlayPauseIcon() { if (videoPlayer.paused || videoPlayer.ended) { playPauseIcon.classList.remove('fa-pause'); playPauseIcon.classList.add('fa-play'); playPauseBtn.setAttribute('aria-label', 'Reproducir'); } else { playPauseIcon.classList.remove('fa-play'); playPauseIcon.classList.add('fa-pause'); playPauseBtn.setAttribute('aria-label', 'Pausar'); } }
+        function updateProgressBar() { const duration = videoPlayer.duration; let percentage = 0; if (duration && isFinite(duration)) { percentage = (videoPlayer.currentTime / duration) * 100; } progressBar.value = percentage || 0; progressBar.style.background = `linear-gradient(to right, #ff0000 ${percentage}%, #e0e0e0 ${percentage}%)`; }
+        function updateTimeDisplay() { const currentTime = formatTime(videoPlayer.currentTime); const duration = isFinite(videoPlayer.duration) ? formatTime(videoPlayer.duration) : '∞'; timeDisplay.textContent = `${currentTime} / ${duration}`; }
+        function seekVideo(change) { if (!isFinite(videoPlayer.duration)) return; const newTime = videoPlayer.currentTime + change; videoPlayer.currentTime = Math.max(0, Math.min(newTime, videoPlayer.duration)); updateProgressBar(); }
+        function seekVideoFromBar() { if (!isFinite(videoPlayer.duration)) return; const time = (progressBar.value / 100) * videoPlayer.duration; videoPlayer.currentTime = time; }
+        function toggleMute() { videoPlayer.muted = !videoPlayer.muted; volumeBtn.setAttribute('aria-label', videoPlayer.muted ? 'Activar Sonido' : 'Silenciar'); }
+        function adjustVolume(change) { let newVolume = videoPlayer.volume + change; newVolume = Math.max(0, Math.min(1, newVolume)); videoPlayer.volume = newVolume; videoPlayer.muted = false; updateVolumeUI(); showPlayerMessage(`Volumen: ${Math.round(videoPlayer.volume * 100)}%`); }
+        function setVolumeFromSlider() { videoPlayer.volume = volumeSlider.value; videoPlayer.muted = parseFloat(volumeSlider.value) === 0; updateVolumeUI(); }
+        function updateVolumeUI() { const volumePercentage = videoPlayer.muted ? 0 : videoPlayer.volume * 100; if (videoPlayer.muted || videoPlayer.volume === 0) { volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down'); volumeIcon.classList.add('fa-volume-mute'); volumeSlider.value = 0; } else if (videoPlayer.volume < 0.5) { volumeIcon.classList.remove('fa-volume-up', 'fa-volume-mute'); volumeIcon.classList.add('fa-volume-down'); volumeSlider.value = videoPlayer.volume; } else { volumeIcon.classList.remove('fa-volume-down', 'fa-volume-mute'); volumeIcon.classList.add('fa-volume-up'); volumeSlider.value = videoPlayer.volume; } volumeSlider.style.background = `linear-gradient(to right, #ff0000 ${volumePercentage}%, #e0e0e0 ${percentage}%)`; } // Corrección: usar volumePercentage
+        function cyclePlaybackSpeed() { currentSpeedIndex = (currentSpeedIndex + 1) % playbackRates.length; const newRate = playbackRates[currentSpeedIndex]; setPlaybackSpeed(newRate); }
+        function setPlaybackSpeed(rate) { videoPlayer.playbackRate = rate; speedBtn.textContent = `${rate}x`; currentSpeedIndex = playbackRates.indexOf(rate); if (currentSpeedIndex === -1) currentSpeedIndex = playbackRates.indexOf(1); console.log(`Playback speed set to: ${rate}x`); }
+        function toggleFullScreen() { const elementToFullscreen = videoPlayerContainer; if (!document.fullscreenElement) { if (elementToFullscreen.requestFullscreen) elementToFullscreen.requestFullscreen().catch(err => console.error("Error FS:", err)); else if (elementToFullscreen.webkitRequestFullscreen) elementToFullscreen.webkitRequestFullscreen(); else if (elementToFullscreen.mozRequestFullScreen) elementToFullscreen.mozRequestFullScreen(); else if (elementToFullscreen.msRequestFullscreen) elementToFullscreen.msRequestFullscreen(); } else { if (document.exitFullscreen) document.exitFullscreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); else if (document.mozCancelFullScreen) document.mozCancelFullScreen(); else if (document.msExitFullscreen) document.msExitFullscreen(); } }
+        function updateFullscreenIcon() { if (document.fullscreenElement) { fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>'; fullscreenBtn.setAttribute('aria-label', 'Salir de Pantalla Completa'); } else { fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>'; fullscreenBtn.setAttribute('aria-label', 'Pantalla Completa'); } }
+        function toggleSidebar() { const isOpen = sidebar.classList.toggle('open'); sidebarOverlay.classList.toggle('hidden'); menuToggle.setAttribute('aria-expanded', isOpen); }
+        function updateSidebarActiveLink(activeView) { homeLink.classList.remove('active'); favoritesLink.classList.remove('active'); if (activeView === 'home') { homeLink.classList.add('active'); } else if (activeView === 'favorites') { favoritesLink.classList.add('active'); } }
+        function navigateChannelList(direction) { const items = Array.from(channelListContainer.querySelectorAll('.channel-item')); if (items.length === 0) return; const currentFocusElement = document.activeElement; let currentVisualIndex = -1; if (currentFocusElement && currentFocusElement.classList.contains('channel-item')) { currentVisualIndex = items.indexOf(currentFocusElement); } else { const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex); currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : 0; } let nextVisualIndex = currentVisualIndex + direction; nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1)); if (nextVisualIndex !== currentVisualIndex || !currentFocusElement || !currentFocusElement.classList.contains('channel-item')) { const nextElement = items[nextVisualIndex]; if (nextElement) { nextElement.focus(); highlightChannelInList(parseInt(nextElement.dataset.index, 10)); } } }
+
+        // --- Event Listeners ---
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        speedBtn.addEventListener('click', cyclePlaybackSpeed);
+        videoPlayerContainer.addEventListener('dblclick', toggleFullScreen);
+        favoriteBtn.addEventListener('click', toggleFavorite);
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        homeLink.addEventListener('click', (e) => { e.preventDefault(); if (currentView !== 'all') { currentView = 'all'; updateSidebarActiveLink('home'); renderChannelList(); } });
+        favoritesLink.addEventListener('click', (e) => { e.preventDefault(); if (currentView !== 'favorites') { currentView = 'favorites'; updateSidebarActiveLink('favorites'); renderChannelList(); } });
+        videoPlayer.addEventListener('play', updatePlayPauseIcon);
+        videoPlayer.addEventListener('pause', updatePlayPauseIcon);
+        videoPlayer.addEventListener('ended', updatePlayPauseIcon);
+        videoPlayer.addEventListener('timeupdate', () => { updateProgressBar(); updateTimeDisplay(); });
+        videoPlayer.addEventListener('loadedmetadata', () => { updateTimeDisplay(); updateProgressBar(); updateVolumeUI(); });
+        videoPlayer.addEventListener('durationchange', updateTimeDisplay);
+        videoPlayer.addEventListener('playing', () => { playerLoader.classList.add('hidden'); videoPlayer.style.opacity = '1'; });
+        videoPlayer.addEventListener('waiting', () => { playerLoader.classList.remove('hidden'); videoPlayer.style.opacity = '0.5'; });
+        videoPlayer.addEventListener('error', (e) => { if (!hls || !hls.url || videoPlayer.src !== '') { handlePlaybackError(videoPlayer.error || new Error('Error desconocido del reproductor')); } });
+        progressBar.addEventListener('input', seekVideoFromBar);
+        volumeBtn.addEventListener('click', toggleMute);
+        volumeSlider.addEventListener('input', setVolumeFromSlider);
+        videoPlayer.addEventListener('volumechange', updateVolumeUI);
+        fullscreenBtn.addEventListener('click', toggleFullScreen);
+        document.addEventListener('fullscreenchange', updateFullscreenIcon);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+        document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
+        document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
+        menuToggle.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        // Keyboard Controls Listener
+        document.addEventListener('keydown', (e) => {
+             const targetTagName = e.target.tagName.toLowerCase();
+             const isInputFocused = targetTagName === 'input' || targetTagName === 'textarea' || targetTagName === 'select';
+             const activeElement = document.activeElement;
+             const isChannelListFocused = channelListContainer && (channelListContainer.contains(activeElement) || activeElement === channelListContainer);
+
+             if (isInputFocused) return;
+             if (e.key === 'b' || e.key === 'B' || e.key === 'Escape') { if (!sidebar.classList.contains('hidden')) { e.preventDefault(); toggleSidebar(); if (menuToggle) menuToggle.focus(); else videoPlayer.focus(); return; } }
+             if (e.key === 'ArrowUp') { e.preventDefault(); if (isChannelListFocused) { navigateChannelList(-1); } else { adjustVolume(0.1); } return; }
+             if (e.key === 'ArrowDown') { e.preventDefault(); if (isChannelListFocused) { navigateChannelList(1); } else { adjustVolume(-0.1); } return; }
+             if ((e.key === 'Enter' || e.key === 'Select') && isChannelListFocused && activeElement && activeElement.classList.contains('channel-item')) { e.preventDefault(); const indexToLoad = parseInt(activeElement.dataset.index, 10); if (!isNaN(indexToLoad)) { loadVideo(indexToLoad); } return; }
+             switch(e.key) {
+                case ' ': e.preventDefault(); togglePlayPause(); break;
+                case 'f': case 'F': e.preventDefault(); toggleFullScreen(); break;
+                case 'm': case 'M': e.preventDefault(); toggleMute(); break;
+                 case 'ArrowLeft': e.preventDefault(); seekVideo(-5); showPlayerMessage(`-5s`); break;
+                 case 'ArrowRight': e.preventDefault(); seekVideo(5); showPlayerMessage(`+5s`); break;
              }
+        });
 
+        // --- Inicialización ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            initializeHls();
+            fetchAndLoadM3U(m3uUrl);
+            updateVolumeUI();
+            updateProgressBar();
+            updateFavoriteButtonState();
+        });
 
-            // --- Select Channel in List and Initiate Playback ---
-            function selectAndPlayChannel(index) {
-                console.log(`selectAndPlayChannel called for logical index: ${index}`);
-                const channel = channels.find(ch => ch.index === index); // Find by logical index
-                if (!channel) {
-                    console.warn(`Invalid channel index for selection: ${index}`);
-                    return;
-                }
-                // First, focus and highlight the channel in the list
-                focusChannel(index);
-                // Then, initiate playback
-                playChannel(index);
-            }
-
-            // --- UI Helper Functions ---
-            function showLoader(show) {
-                loaderElement.style.display = show ? 'block' : 'none';
-            }
-
-            function clearAutoHideTimer() {
-                if (autoHideSidebarTimeoutId) {
-                    clearTimeout(autoHideSidebarTimeoutId);
-                    autoHideSidebarTimeoutId = null;
-                }
-            }
-
-            function startAutoHideTimer() {
-                clearAutoHideTimer(); // Clear any existing timer
-                // Hide sidebar after 2.5 seconds if it's visible and video is playing
-                autoHideSidebarTimeoutId = setTimeout(() => {
-                    if (!sidebar.classList.contains('hidden') && !video.paused) {
-                        hideSidebar();
-                    }
-                    autoHideSidebarTimeoutId = null; // Clear the ID after execution
-                }, 2500);
-            }
-
-            function toggleSidebar() {
-                clearAutoHideTimer(); // Stop timer when manually toggling
-                if (sidebar.classList.contains('hidden')) {
-                    showSidebar();
-                } else {
-                    hideSidebar();
-                }
-            }
-
-            function hideSidebar() {
-                if (!sidebar.classList.contains('hidden')) {
-                    sidebar.classList.add('hidden');
-                    console.log("Sidebar hidden");
-                    // Optionally move focus away from sidebar elements
-                    // *** MODIFICADO: Enfocar el video en lugar del contenedor para intentar evitar el outline ***
-                    // playerContent.focus();
-                     video.focus({ preventScroll: true }); // Enfocar el video directamente
-                }
-            }
-
-            function showSidebar() {
-                clearAutoHideTimer(); // Stop timer when manually showing
-                if (sidebar.classList.contains('hidden')) {
-                    sidebar.classList.remove('hidden');
-                    console.log("Sidebar shown");
-                    // Use rAF to ensure focus happens after transition/render
-                    requestAnimationFrame(() => focusChannel(currentChannelIndex));
-                } else {
-                    // If already shown, just ensure the current channel is focused
-                    focusChannel(currentChannelIndex);
-                }
-            }
-
-            /** Highlights the selected channel item in the list. */
-            function highlightChannel(index) {
-                // console.log(`Highlighting channel with logical index: ${index}`);
-                channelListElement.querySelectorAll('.channel-item').forEach((item) => {
-                    const itemIndex = parseInt(item.dataset.index, 10); // Get logical index from data attribute
-                    item.classList.toggle('selected', itemIndex === index); // Add/remove 'selected' class
-                });
-            }
-
-            /** Sets focus on and scrolls to the specified channel item. */
-            function focusChannel(index, instant = false) {
-                console.log(`focusChannel START for logical index: ${index}, instant: ${instant}`);
-                // If sidebar is hidden, show it first. The showSidebar function will then call focusChannel again.
-                if (sidebar.classList.contains('hidden')) {
-                    console.log("Sidebar is hidden, calling showSidebar which will then focus.");
-                    showSidebar();
-                    return; // Exit early, showSidebar will handle the focus
-                }
-
-                // Find the list item using the logical index stored in data-index
-                const itemToFocus = channelListElement.querySelector(`.channel-item[data-index="${index}"]`);
-
-                if (itemToFocus) {
-                    console.log("Found item to focus:", itemToFocus);
-                    // Set focus without causing the browser's default scroll behavior
-                    itemToFocus.focus({ preventScroll: true });
-                    // Apply the visual highlight
-                    highlightChannel(index);
-                    // Scroll the item into view within the list container
-                    console.log("Calling scrollIntoView with block: 'center'");
-                    itemToFocus.scrollIntoView({
-                        behavior: instant ? 'instant' : 'smooth', // Use instant scrolling on initial load/major changes
-                        block: 'center', // Try to center the item vertically
-                        inline: 'nearest' // Keep horizontally aligned
-                    });
-                    console.log("focusChannel END for index:", index);
-                } else {
-                    // Fallback if the item isn't found (e.g., list empty, index invalid)
-                    console.warn(`Channel item with logical index ${index} not found in focusChannel.`);
-                    // Try focusing the first item or the list itself as a last resort
-                    const firstItem = channelListElement.querySelector('.channel-item');
-                    if (firstItem) {
-                        firstItem.focus();
-                    } else {
-                        channelListElement.focus(); // Focus the container if no items
-                    }
-                    console.log("focusChannel END (fallback) for index:", index);
-                }
-            }
-
-
-            /** Displays a message in the channel info overlay. */
-            function showChannelInfo(text) {
-                clearTimeout(channelInfoTimeout); // Clear previous timeout
-                channelInfoElement.textContent = text; // Set text content
-                channelInfoElement.classList.add('visible'); // Make it visible
-
-                // Set a timer to hide the info after 4 seconds
-                channelInfoTimeout = setTimeout(() => {
-                    channelInfoElement.classList.remove('visible');
-                }, 4000);
-            }
-
-            // --- Video Event Listeners ---
-            video.addEventListener('pause', () => {
-                console.log("Video paused.");
-                clearAutoHideTimer(); // Stop auto-hiding sidebar on pause
-            });
-
-            video.addEventListener('ended', () => {
-                console.log("Video ended.");
-                clearAutoHideTimer(); // Stop auto-hiding sidebar on end
-                const endedChannel = channels.find(ch => ch.index === currentChannelIndex);
-                showChannelInfo(`"${endedChannel?.name || 'Stream'}" finished.`);
-                // Optional: Auto-play next channel? (Requires more logic)
-            });
-
-            video.addEventListener('volumechange', () => {
-                // Save volume and muted state whenever they change
-                saveToLocalStorage(VOLUME_STORAGE_KEY, video.volume);
-                saveToLocalStorage(MUTED_STORAGE_KEY, video.muted);
-                // Optional: Briefly show volume level?
-                // showChannelInfo(`Volume: ${video.muted ? 'Muted' : Math.round(video.volume * 100) + '%'}`);
-            });
-
-            // --- Keyboard/Remote Control Handling ---
-            document.addEventListener('keydown', (event) => {
-                // Ignore keypresses if focus is inside an input field (future-proofing)
-                if (event.target.tagName === 'INPUT' || ['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
-                    return;
-                }
-
-                // --- Handling when Sidebar is Hidden ---
-                if (sidebar.classList.contains('hidden')) {
-                    // If sidebar is hidden, most keys should show it first
-                    // Exceptions: Back/Escape/B should do nothing if sidebar is already hidden.
-                    if (event.key !== 'Backspace' && event.key !== 'Escape' && event.key !== 'b' && event.key !== 'B') {
-                        event.preventDefault(); // Prevent default action (like scrolling)
-                        showSidebar(); // Show the sidebar
-                        return; // Stop further processing for this key event
-                    } else if (event.key === 'Backspace' || event.key === 'Escape' || event.key === 'b' || event.key === 'B') {
-                        event.preventDefault(); // Prevent default back navigation etc.
-                        return; // Do nothing if trying to hide an already hidden sidebar
-                    }
-                }
-
-                // Determine if focus is currently on a channel item within the visible sidebar
-                isSidebarFocused = sidebar.contains(document.activeElement) && document.activeElement.classList.contains('channel-item');
-
-                // --- Handling when Sidebar is Visible ---
-                if (!sidebar.classList.contains('hidden')) {
-                    if (isSidebarFocused) {
-                        // --- Keyboard Actions when Focus is INSIDE the Channel List ---
-                        const focusedElement = document.activeElement;
-                        // Get the logical index from the focused element's data attribute
-                        const focusedIndex = focusedElement?.classList.contains('channel-item') ? parseInt(focusedElement.dataset.index, 10) : -1;
-
-                        switch (event.key) {
-                            case 'ArrowUp':
-                                event.preventDefault();
-                                navigateList(-1); // Move selection up
-                                break;
-                            case 'ArrowDown':
-                                event.preventDefault();
-                                navigateList(1); // Move selection down
-                                break;
-                            case 'Enter':
-                            case ' ': // Spacebar also selects
-                                event.preventDefault();
-                                if (focusedIndex !== -1) {
-                                    selectAndPlayChannel(focusedIndex); // Play the focused channel
-                                }
-                                break;
-                            case 'ArrowRight': // Use ArrowRight to toggle favorite
-                                event.preventDefault();
-                                console.log(`ArrowRight pressed. Focused Logical Index: ${focusedIndex}`);
-                                if (focusedElement?.classList.contains('channel-item')) {
-                                    const favButton = focusedElement.querySelector('.favorite-btn');
-                                    const channelUrl = favButton?.dataset.channelUrl;
-                                    console.log(`Channel URL for favorite toggle: ${channelUrl}`);
-                                    if(favButton && channelUrl && focusedIndex !== -1) {
-                                        toggleFavorite(channelUrl, favButton); // Toggle favorite status
-                                        console.log("Calling renderChannelList after toggleFavorite (ArrowRight)");
-                                        renderChannelList(); // Re-render to reflect sort change
-                                        console.log("renderChannelList finished. Requesting animation frame for focus.");
-                                        // Re-focus the same logical item after re-render
-                                        requestAnimationFrame(() => {
-                                            console.log(`rAF (after ArrowRight): Calling focusChannel(${focusedIndex})`);
-                                            focusChannel(focusedIndex);
-                                        });
-                                    } else {
-                                        console.log("Could not find favButton or channelUrl or index was invalid for favorite toggle.");
-                                    }
-                                }
-                                break;
-                            case 'Backspace': // Backspace key
-                            case 'Escape':    // Escape key
-                            case 'b':         // 'b' key (common remote back button mapping)
-                            case 'B':
-                                event.preventDefault();
-                                hideSidebar(); // Hide the sidebar
-                                break;
-                            case 'ArrowLeft': // Prevent default browser back navigation if possible
-                                event.preventDefault();
-                                // Could potentially hide sidebar here too, or do nothing
-                                break;
-                            // Add PageUp/PageDown for faster scrolling?
-                            // case 'PageUp': event.preventDefault(); navigateList(-10); break; // Example
-                            // case 'PageDown': event.preventDefault(); navigateList(10); break; // Example
-                        }
-                    } else {
-                        // --- Keyboard Actions when Sidebar is Visible but Focus is OUTSIDE the List ---
-                        // (e.g., focus is on the video or somewhere else)
-                        switch (event.key) {
-                            case 'Backspace':
-                            case 'Escape':
-                            case 'b':
-                            case 'B':
-                                event.preventDefault();
-                                hideSidebar(); // Hide the sidebar
-                                break;
-                            case ' ': // Spacebar toggles play/pause if video has a source
-                                event.preventDefault();
-                                if (video.src || (hls && hls.url)) { // Check if video is loaded
-                                    if (video.paused) {
-                                        video.play().catch(handlePlayError);
-                                    } else {
-                                        video.pause();
-                                    }
-                                }
-                                break;
-                            case 'm': // Mute toggle
-                            case 'M':
-                                event.preventDefault();
-                                video.muted = !video.muted;
-                                showChannelInfo(video.muted ? "Muted" : "Unmuted");
-                                break;
-                            case 'ArrowUp': // Volume Up
-                                event.preventDefault();
-                                adjustVolume(0.1);
-                                break;
-                            case 'ArrowDown': // Volume Down
-                                event.preventDefault();
-                                adjustVolume(-0.1);
-                                break;
-                            case 'f': // Fullscreen toggle
-                            case 'F':
-                                event.preventDefault();
-                                toggleFullScreen();
-                                break;
-                            case 'ArrowLeft': // Seek back? (Requires more complex logic)
-                            case 'ArrowRight': // Seek forward? (Requires more complex logic)
-                                event.preventDefault();
-                                // Example: video.currentTime -= 10;
-                                break;
-                        }
-                    }
-                }
-            });
-
-            // --- List Navigation Logic ---
-            function navigateList(direction) {
-                if (channels.length === 0) return; // Do nothing if list is empty
-
-                const items = Array.from(channelListElement.querySelectorAll('.channel-item')); // Get all visible items in current sort order
-                if (items.length === 0) return;
-
-                const currentFocusedElement = document.activeElement;
-                let currentVisualIndex = -1; // Index in the *currently rendered* list (items array)
-
-                // Find the visual index of the currently focused item
-                if (currentFocusedElement && currentFocusedElement.classList.contains('channel-item')) {
-                    currentVisualIndex = items.indexOf(currentFocusedElement);
-                } else {
-                    // If focus is not on an item, find the visual index corresponding to the *logical* currentChannelIndex
-                    const logicalIndexInVisual = items.findIndex(item => parseInt(item.dataset.index, 10) === currentChannelIndex);
-                    currentVisualIndex = (logicalIndexInVisual !== -1) ? logicalIndexInVisual : 0; // Default to 0 if not found
-                }
-
-                // Calculate the next visual index based on direction
-                let nextVisualIndex = currentVisualIndex + direction;
-
-                // Clamp the index within the bounds of the visual list
-                nextVisualIndex = Math.max(0, Math.min(nextVisualIndex, items.length - 1));
-
-                // If the index changed, focus the new item
-                if (nextVisualIndex !== currentVisualIndex && items[nextVisualIndex]) {
-                    const nextElement = items[nextVisualIndex];
-                    // Get the logical index from the next element's data attribute
-                    const nextLogicalIndex = parseInt(nextElement.dataset.index, 10);
-                    // Update the logical currentChannelIndex *before* focusing
-                    // This ensures subsequent actions (like play) use the correct logical index
-                    currentChannelIndex = nextLogicalIndex;
-                    // Focus the visually next item (which corresponds to the new logical index)
-                    focusChannel(currentChannelIndex); // Use the logical index for focus function
-                } else if (items[currentVisualIndex]) {
-                    // If navigation didn't change the item (e.g., at top/bottom), re-focus the current one
-                    // This helps ensure it's centered if scrollIntoView didn't fully center before
-                    focusChannel(parseInt(items[currentVisualIndex].dataset.index, 10));
-                }
-            }
-
-
-            // --- Volume Adjustment ---
-            function adjustVolume(change) {
-                let newVolume = video.volume + change;
-                newVolume = Math.max(0, Math.min(1, newVolume)); // Clamp between 0 and 1
-                video.volume = newVolume;
-                video.muted = false; // Unmute when adjusting volume
-                showChannelInfo(`Volume: ${Math.round(video.volume * 100)}%`);
-            }
-
-            // --- Fullscreen Toggle ---
-            function toggleFullScreen() {
-                if (!document.fullscreenElement) {
-                    // Request fullscreen on the player container or the whole body
-                    (playerContent || document.documentElement).requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                        showChannelInfo("Fullscreen not supported or denied.");
-                    });
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    }
-                }
-            }
-
-            // --- Initial Load ---
-            fetchAndParseM3U(m3uUrl); // Start the process by fetching the M3U
-
-        }); // End DOMContentLoaded
     </script>
 </body>
 </html>
